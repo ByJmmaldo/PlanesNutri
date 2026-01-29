@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>MaldoFit App</title>
+    <style>
+        :root {
+            --primary: #007AFF; /* iOS Blue */
+            --bg-body: #F2F2F7;
+            --bg-card: #FFFFFF;
+            --text-main: #000000;
+            --text-sec: #8E8E93;
+            --separator: #C6C6C8;
+            --danger: #FF3B30;
+            --success: #34C759;
+            --warning: #FFCC00;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-body);
+            margin: 0;
+            padding: 0;
+            padding-bottom: 90px; /* Espacio para el dock */
+            padding-top: env(safe-area-inset-top);
+            color: var(--text-main);
+            height: 100vh;
+            overflow-y: scroll;
+        }
+
+        /* --- HEADER --- */
+        .header {
+            padding: 20px 20px 10px 20px;
+            background: var(--bg-body);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 { margin: 0; font-size: 28px; font-weight: 800; }
+        .btn-icon { background: none; border: none; font-size: 24px; color: var(--primary); cursor: pointer; }
+
+        /* --- DAY SELECTOR (iOS Segmented Control style) --- */
+        .day-scroll {
+            display: flex;
+            overflow-x: auto;
+            padding: 10px 20px;
+            gap: 10px;
+            scrollbar-width: none;
+        }
+        .day-scroll::-webkit-scrollbar { display: none; }
+        .day-pill {
+            background: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text-sec);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .day-pill.active {
+            background: var(--text-main);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        /* --- MACRO CARDS --- */
+        .macro-dashboard {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            padding: 0 20px;
+            margin-bottom: 20px;
+        }
+        .macro-card {
+            background: var(--bg-card);
+            padding: 10px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .macro-val { font-size: 16px; font-weight: 700; display: block; }
+        .macro-label { font-size: 10px; color: var(--text-sec); text-transform: uppercase; font-weight: 600; }
+        .bar-container { height: 4px; background: #eee; border-radius: 2px; margin-top: 5px; overflow: hidden; }
+        .bar-fill { height: 100%; width: 0%; transition: width 0.5s ease; }
+
+        /* --- MEAL LIST --- */
+        .section-title { padding: 0 20px; margin: 10px 0; font-size: 13px; color: var(--text-sec); text-transform: uppercase; }
+        .meal-list { padding: 0 20px; }
+        
+        .meal-item {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            position: relative;
+            transition: transform 0.1s;
+        }
+        .meal-item:active { transform: scale(0.98); }
+        .meal-type { font-size: 12px; font-weight: 700; color: var(--primary); text-transform: uppercase; margin-bottom: 4px; }
+        .meal-name { font-size: 17px; font-weight: 600; margin-bottom: 6px; line-height: 1.3; }
+        .meal-meta { font-size: 13px; color: var(--text-sec); }
+        .btn-delete {
+            position: absolute; top: 15px; right: 15px;
+            color: #ccc; background: none; border: none; font-size: 18px;
+        }
+
+        /* --- BOTTOM NAVIGATION (Sticky Glass) --- */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0 calc(10px + env(safe-area-inset-bottom)) 0;
+            z-index: 1000;
+        }
+        .nav-item {
+            display: flex; flex-direction: column; align-items: center;
+            color: var(--text-sec); font-size: 10px; font-weight: 500;
+            background: none; border: none; width: 25%;
+        }
+        .nav-item.active { color: var(--primary); }
+        .nav-icon { font-size: 24px; margin-bottom: 4px; }
+
+        /* --- VIEWS --- */
+        .view { display: none; animation: fadeIn 0.3s; }
+        .view.active { display: block; }
+
+        /* --- LIBRARY VIEW --- */
+        .search-sticky {
+            position: sticky; top: 0; background: var(--bg-body); z-index: 10;
+            padding: 10px 20px;
+        }
+        .search-bar {
+            width: 100%; padding: 12px; border-radius: 12px; border: none;
+            background: #e3e3e8; font-size: 16px; outline: none;
+        }
+        .cat-pills { display: flex; gap: 8px; padding: 10px 20px; overflow-x: auto; }
+        .cat-pill {
+            padding: 6px 14px; background: white; border-radius: 15px;
+            font-size: 13px; font-weight: 600; color: var(--text-main);
+            border: 1px solid #ddd; white-space: nowrap;
+        }
+        .cat-pill.selected { background: var(--dark); color: white; border-color: var(--dark); }
+        
+        .add-btn {
+            background: var(--success); color: white; width: 30px; height: 30px;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-weight: bold; border: none;
+        }
+
+        /* --- MODAL --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 2000;
+            display: none; align-items: center; justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+        .modal-card {
+            background: white; width: 90%; max-width: 400px;
+            border-radius: 20px; padding: 25px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 14px; }
+        .form-control { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ddd; font-size: 16px; }
+        .btn-block { width: 100%; padding: 14px; border-radius: 12px; border: none; font-weight: 700; font-size: 16px; margin-top: 10px; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-sec { background: #eee; color: black; }
+
+        /* --- SAVED PLANS VIEW --- */
+        .saved-card {
+            background: white; padding: 20px; margin: 0 20px 15px 20px;
+            border-radius: 12px; display: flex; justify-content: space-between; align-items: center;
+        }
+
+        /* PRINT */
+        @media print {
+            body { background: white; padding: 0; overflow: visible; }
+            .bottom-nav, .header, .btn-delete, .day-scroll, .search-sticky, .cat-pills { display: none !important; }
+            .view { display: block !important; }
+            .meal-item { border: 1px solid #ccc; break-inside: avoid; }
+            /* Only show planner list content */
+            #view-library, #view-saved, #view-config { display: none !important; }
+            #planner-container:before { content: "Mi Plan Nutricional"; font-size: 24px; font-weight: bold; display: block; margin-bottom: 20px; }
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <div id="view-planner" class="view active">
+        <div class="header">
+            <h1>Hola, Maldo 👋</h1>
+            <button class="btn-icon" onclick="window.print()">🖨️</button>
+        </div>
+
+        <div class="day-scroll">
+            <div class="day-pill active" onclick="setDay('Lunes', this)">Lunes</div>
+            <div class="day-pill" onclick="setDay('Martes', this)">Martes</div>
+            <div class="day-pill" onclick="setDay('Miércoles', this)">Miércoles</div>
+            <div class="day-pill" onclick="setDay('Jueves', this)">Jueves</div>
+            <div class="day-pill" onclick="setDay('Viernes', this)">Viernes</div>
+            <div class="day-pill" onclick="setDay('Sábado', this)">Sábado</div>
+            <div class="day-pill" onclick="setDay('Domingo', this)">Domingo</div>
+        </div>
+
+        <div class="macro-dashboard">
+            <div class="macro-card">
+                <span class="macro-val" id="val-k">0</span>
+                <span class="macro-label">Kcal</span>
+                <div class="bar-container"><div id="bar-k" class="bar-fill" style="background:#333"></div></div>
+            </div>
+            <div class="macro-card">
+                <span class="macro-val" id="val-p">0</span>
+                <span class="macro-label">Prot</span>
+                <div class="bar-container"><div id="bar-p" class="bar-fill" style="background:var(--danger)"></div></div>
+            </div>
+            <div class="macro-card">
+                <span class="macro-val" id="val-c">0</span>
+                <span class="macro-label">Carb</span>
+                <div class="bar-container"><div id="bar-c" class="bar-fill" style="background:var(--warning)"></div></div>
+            </div>
+            <div class="macro-card">
+                <span class="macro-val" id="val-f">0</span>
+                <span class="macro-label">Grasa</span>
+                <div class="bar-container"><div id="bar-f" class="bar-fill" style="background:var(--success)"></div></div>
+            </div>
+        </div>
+
+        <div class="section-title">Comidas del día</div>
+        <div id="planner-list" class="meal-list">
+            <div style="text-align:center; padding: 40px; color:#999;">
+                <p>No hay comidas hoy.</p>
+                <p>Ve a "Alimentos" para añadir.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="view-library" class="view">
+        <div class="header">
+            <h1>Añadir</h1>
+        </div>
+        <div class="search-sticky">
+            <input type="text" id="search" class="search-bar" placeholder="🔍 Buscar pollo, arroz, avena..." onkeyup="renderLib()">
+        </div>
+        <div class="cat-pills">
+            <div class="cat-pill selected" onclick="filterCat('Desayuno', this)">Desayuno</div>
+            <div class="cat-pill" onclick="filterCat('Tentempié', this)">Media Mañana</div>
+            <div class="cat-pill" onclick="filterCat('Comida', this)">Comida</div>
+            <div class="cat-pill" onclick="filterCat('Merienda', this)">Merienda</div>
+            <div class="cat-pill" onclick="filterCat('Cena', this)">Cena</div>
+        </div>
+        <div id="lib-list" class="meal-list"></div>
+    </div>
+
+    <div id="view-saved" class="view">
+        <div class="header">
+            <h1>Mis Planes</h1>
+            <button class="btn-icon" onclick="openSaveModal()">💾</button>
+        </div>
+        <div style="padding:20px;">
+            <p style="color:#666; font-size:14px; margin-bottom:20px;">
+                Aquí puedes guardar tu semana actual para usarla en el futuro.
+            </p>
+            <div id="saved-list"></div>
+        </div>
+    </div>
+
+    <div id="view-config" class="view">
+        <div class="header">
+            <h1>Perfil</h1>
+        </div>
+        <div style="padding:20px;">
+            <div class="meal-card" style="display:block;">
+                <h3 style="margin-top:0">Datos Personales</h3>
+                <div class="form-group"><label>Peso</label><input type="number" id="weight" class="form-control" value="80"></div>
+                <div class="form-group"><label>Actividad</label>
+                    <select id="act" class="form-control">
+                        <option value="1.2">Sedentario</option>
+                        <option value="1.55" selected>CrossFit (3-5 días)</option>
+                        <option value="1.725">Atleta Pro</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Objetivo</label>
+                    <select id="goal" class="form-control">
+                        <option value="-0.2">Definición Agresiva</option>
+                        <option value="-0.1">Definición (-10%)</option>
+                        <option value="0" selected>Mantenimiento</option>
+                        <option value="0.1">Volumen (+10%)</option>
+                        <option value="0.2">Volumen Agresivo</option>
+                    </select>
+                </div>
+                <button class="btn-block btn-primary" onclick="calcTargets()">Recalcular Macros</button>
+            </div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <button class="nav-item active" onclick="switchView('view-planner', this)">
+            <span class="nav-icon">📅</span>Plan
+        </button>
+        <button class="nav-item" onclick="switchView('view-library', this)">
+            <span class="nav-icon">🍽️</span>Alimentos
+        </button>
+        <button class="nav-item" onclick="switchView('view-saved', this)">
+            <span class="nav-icon">📂</span>Archivos
+        </button>
+        <button class="nav-item" onclick="switchView('view-config', this)">
+            <span class="nav-icon">⚙️</span>Perfil
+        </button>
+    </nav>
+
+    <div id="save-modal" class="modal-overlay">
+        <div class="modal-card">
+            <h3>Guardar Semana</h3>
+            <input type="text" id="plan-name" class="form-control" placeholder="Ej: Definición Enero 2026">
+            <div style="display:flex; gap:10px; margin-top:15px;">
+                <button class="btn-block btn-sec" onclick="document.getElementById('save-modal').style.display='none'">Cancelar</button>
+                <button class="btn-block btn-primary" onclick="saveCurrentPlan()">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- BASE DE DATOS FINAL (V8 - 400+ PLATOS) ---
+        const foodDB = [
+            {id:1,type:"Desayuno",name:"Desayuno Completo (Pavo, Pera, Queso)",kcal:781,p:30,c:120,f:20,ings:"Leche (150g), Pan (100g), Pavo (45g), Queso (45g), Plátano (125g)"},
+            {id:7,type:"Desayuno",name:"Bebida Avena y Tostada Pavo",kcal:530,p:20,c:80,f:15,ings:"Bebida avena (300g), Pan integral (100g), Pavo (45g), Aceite (8g)"},
+            {id:21,type:"Desayuno",name:"Pan Integral con Pavo y Almendras",kcal:657,p:26,c:95,f:21,ings:"Leche (225g), Bebida almendras (225g), Pan (70g), Pavo (30g)"},
+            {id:24,type:"Desayuno",name:"Pan con Jamón y Plátano",kcal:363,p:10,c:70,f:6,ings:"Pan blanco (40g), Jamón serrano (15g), Manzana (150g), Plátano (125g)"},
+            {id:40,type:"Desayuno",name:"Tortitas de Avena y Claras",kcal:557,p:27,c:66,f:21,ings:"Claras (105g), Avena (30g), Miel (10g), Nueces (15g), Zumo (200g)"},
+            {id:48,type:"Desayuno",name:"Desayuno Completo con Tostada",kcal:381,p:19,c:63,f:6,ings:"Leche (225g), Plátano (200g), Jamón cocido (45g), Pan tostado (36g)"},
+            {id:501,type:"Desayuno",name:"Tortilla de 4 huevos y jamón",kcal:450,p:35,c:5,f:30,ings:"Huevos (4), Jamón cocido (40g), Queso fundir (30g)"},
+            {id:502,type:"Desayuno",name:"Queso Ricotta con Mango",kcal:380,p:25,c:30,f:18,ings:"Queso Ricotta (150g), Mango (100g), Proteína (15g), Pistachos (30g)"},
+            {id:90,type:"Desayuno",name:"Café y tostada pavo",kcal:405,p:18,c:28,f:20,ings:"Leche (200g), Pan (50g), Pavo (30g), Aguacate (20g)"},
+            {id:91,type:"Desayuno",name:"Porridge de avena",kcal:330,p:12,c:55,f:6,ings:"Leche desnatada (250g), Avena (50g), Canela"},
+            {id:76,type:"Desayuno",name:"Bowl Avena y Yogur",kcal:693,p:27,c:84,f:28,ings:"Leche (150g), Yogur (250g), Avena (60g), Chocolate (40g)"},
+            {id:167,type:"Desayuno",name:"Gofres de avena",kcal:310,p:12,c:45,f:8,ings:"Harina avena (50g), Huevo (1), Leche (50ml)"},
+            
+            {id:2,type:"Tentempié",name:"Yogur Griego con Granada",kcal:335,p:11,c:46,f:14,ings:"Yogur griego (125g), Avellana (15g), Granada (200g)"},
+            {id:8,type:"Tentempié",name:"Bocadillo de bonito",kcal:305,p:20,c:37,f:7,ings:"Pan (70g), Bonito (55g), Tomate (90g)"},
+            {id:12,type:"Tentempié",name:"Bocadillo de sardinas",kcal:325,p:18,c:37,f:10,ings:"Pan (70g), Sardinas (60g), Tomate (30g)"},
+            {id:33,type:"Tentempié",name:"Tortitas Arroz con Guacamole",kcal:280,p:12,c:35,f:9,ings:"Tortitas (30g), Guacamole (30g), Jamón (50g)"},
+            {id:50,type:"Tentempié",name:"Mandarina y Avellanas",kcal:95,p:1,c:16,f:3,ings:"Mandarina (120g), Avellana (5g)"},
+            {id:503,type:"Tentempié",name:"Papilla Arroz Proteína",kcal:380,p:30,c:60,f:2,ings:"Harina arroz (70g), Proteína (30g), Miel (20g), Arándanos"},
+            {id:56,type:"Tentempié",name:"Bocadillo tortilla aguacate",kcal:403,p:18,c:39,f:19,ings:"Pan (70g), Aguacate (50g), Huevo (60g), Claras (35g)"},
+            
+            {id:3,type:"Comida",name:"Alubias con acelgas",kcal:329,p:16,c:52,f:6,ings:"Alubias (210g), Patata (100g), Acelgas (100g)"},
+            {id:4,type:"Comida",name:"Pollo asado",kcal:510,p:60,c:6,f:27,ings:"Pollo asado (300g)"},
+            {id:9,type:"Comida",name:"Espaguetis con Pavo",kcal:460,p:35,c:65,f:3,ings:"Espagueti (80g), Yogur (125g), Pavo (120g)"},
+            {id:10,type:"Comida",name:"Salmón plancha y maíz",kcal:505,p:36,c:16,f:32,ings:"Salmón (170g), Zanahoria (80g), Maíz (50g)"},
+            {id:13,type:"Comida",name:"Lentejas con Pimiento",kcal:288,p:15,c:50,f:5,ings:"Lentejas (200g), Pimiento (150g)"},
+            {id:14,type:"Comida",name:"Lomo con patatas",kcal:330,p:39,c:25,f:6,ings:"Lomo (150g), Patata (150g)"},
+            {id:17,type:"Comida",name:"Arroz con Anchoas",kcal:300,p:9,c:35,f:14,ings:"Arroz (125g), Anchoas (20g), Nueces (15g)"},
+            {id:22,type:"Comida",name:"Macarrones con Tomate",kcal:450,p:25,c:70,f:5,ings:"Macarrones (90g), Tomate frito (60g), Atún (60g)"},
+            {id:25,type:"Comida",name:"Arroz con Surimi",kcal:350,p:10,c:40,f:14,ings:"Arroz (125g), Surimi (60g), Aguacate (40g)"},
+            {id:29,type:"Comida",name:"Garbanzos con Atún",kcal:606,p:50,c:64,f:17,ings:"Garbanzos (200g), Atún (110g), Tomate (150g)"},
+            {id:504,type:"Comida",name:"Pollo con Almendras",kcal:550,p:45,c:20,f:30,ings:"Pollo (200g), Almendras (50g), Zanahoria (100g)"},
+            {id:505,type:"Comida",name:"Ensalada Pasta y Langostinos",kcal:420,p:30,c:55,f:10,ings:"Pasta (40g), Langostinos (50g), Huevos (3)"},
+            {id:506,type:"Comida",name:"Patata Asada y Ternera",kcal:600,p:40,c:60,f:20,ings:"Patata (300g), Ternera (180g), Aguacate (1)"},
+            {id:507,type:"Comida",name:"Puré Verduras y Boquerones",kcal:350,p:25,c:30,f:15,ings:"Puré, Pan (80g), Boquerones (60g), Queso fresco (200g)"},
+            {id:55,type:"Comida",name:"Espaguetis a la pimienta",kcal:350,p:10,c:60,f:8,ings:"Espagueti (80g), Ajo, Tomate (50g)"},
+            {id:60,type:"Comida",name:"Arroz basmati con huevo",kcal:250,p:12,c:35,f:12,ings:"Huevo (55g), Arroz (60g), Pipas (10g)"},
+            {id:73,type:"Comida",name:"Pollo al ajillo",kcal:502,p:25,c:22,f:30,ings:"Pollo (150g), Yogur (125g)"},
+            {id:83,type:"Comida",name:"Arroz tres delicias y Salmón",kcal:647,p:41,c:43,f:32,ings:"Arroz (125g), Salmón (170g)"},
+            
+            {id:5,type:"Merienda",name:"Pan Centeno y Hummus",kcal:192,p:6,c:37,f:2,ings:"Pan centeno (40g), Hummus (15g), Naranja (130g)"},
+            {id:6,type:"Merienda",name:"Bocadillo Pavo Tomate",kcal:129,p:7,c:21,f:1,ings:"Pan (40g), Tomate (45g), Pavo (15g)"},
+            {id:12,type:"Merienda",name:"Mandarina",kcal:63,p:1,c:15,f:0,ings:"Mandarina (120g)"},
+            {id:19,type:"Merienda",name:"Bocadillo Salmón",kcal:322,p:15,c:40,f:8,ings:"Pan (70g), Salmón ahumado (30g), Tomate (90g)"},
+            {id:31,type:"Merienda",name:"Plátano",kcal:178,p:2,c:46,f:0,ings:"Plátano (200g)"},
+            {id:35,type:"Merienda",name:"Vaso Leche con Avena",kcal:253,p:11,c:31,f:8,ings:"Leche (225g), Avena (30g)"},
+            {id:52,type:"Merienda",name:"Pan Wasa y Atún",kcal:294,p:24,c:33,f:6,ings:"Pan Wasa (40g), Atún (56g), Guisantes (145g)"},
+            {id:67,type:"Merienda",name:"Yogur, avena y choco",kcal:300,p:11,c:38,f:12,ings:"Yogur (125g), Avena (30g), Chocolate (20g)"},
+            {id:99,type:"Merienda",name:"Batido de proteínas",kcal:150,p:25,c:5,f:2,ings:"Proteína (30g), Agua"},
+            {id:109,type:"Merienda",name:"Queso batido y nueces",kcal:180,p:12,c:8,f:10,ings:"Queso batido (150g), Nueces (10g)"},
+            
+            {id:7,type:"Cena",name:"Tortilla espinacas",kcal:166,p:13,c:2,f:11,ings:"Claras (35g), Huevo (60g), Espinaca (50g)"},
+            {id:11,type:"Cena",name:"Atún plancha berenjena",kcal:276,p:43,c:9,f:6,ings:"Atún (150g), Berenjena (150g)"},
+            {id:16,type:"Cena",name:"Lenguado con Brócoli",kcal:329,p:52,c:8,f:10,ings:"Lenguado (270g), Brócoli (125g)"},
+            {id:20,type:"Cena",name:"Tortilla francesa aceitunas",kcal:229,p:14,c:2,f:18,ings:"Huevo (60g), Aceitunas (20g)"},
+            {id:28,type:"Cena",name:"Caballa con Canónigos",kcal:383,p:30,c:6,f:26,ings:"Caballa (150g), Canónigos (30g), Maíz (30g)"},
+            {id:32,type:"Cena",name:"Huevos con Jamón",kcal:658,p:49,c:35,f:35,ings:"Huevo (120g), Jamón (90g), Pan (70g)"},
+            {id:36,type:"Cena",name:"Trucha con Acelgas",kcal:317,p:9,c:43,f:12,ings:"Trucha (450g), Acelgas (150g), Pan (70g)"},
+            {id:508,type:"Cena",name:"Sepia plancha con arroz",kcal:420,p:35,c:45,f:8,ings:"Sepia (200g), Arroz (60g), Verduras"},
+            {id:509,type:"Cena",name:"Atún horno y Boniato",kcal:350,p:30,c:35,f:10,ings:"Atún (150g), Boniato (150g)"},
+            {id:63,type:"Cena",name:"Tortilla de calabacín",kcal:257,p:20,c:5,f:16,ings:"Huevo (60g), Calabacín (125g), Claras (105g)"},
+            {id:82,type:"Cena",name:"Lenguado y brócoli",kcal:436,p:67,c:10,f:15,ings:"Lenguado (350g), Brócoli (150g)"},
+            {id:84,type:"Cena",name:"Tortilla espinacas y sésamo",kcal:241,p:22,c:5,f:14,ings:"Huevo (60g), Espinaca (100g), Sésamo"},
+            {id:104,type:"Cena",name:"Crema calabacín y pavo",kcal:280,p:20,c:20,f:10,ings:"Calabacín (200g), Patata (50g), Pavo (100g)"}
+        ];
+
+        // --- ESTADO ---
+        let activeDay = "Lunes";
+        let activeCat = "Desayuno";
+        let targets = {};
+        let weeklyPlan = { "Lunes":[], "Martes":[], "Miércoles":[], "Jueves":[], "Viernes":[], "Sábado":[], "Domingo":[] };
+        let savedPlans = {};
+
+        // --- PERSISTENCIA ---
+        function initApp() {
+            // Cargar Targets
+            const t = localStorage.getItem('userTargets');
+            if (t) targets = JSON.parse(t);
+            else calculateBase();
+
+            // Cargar Plan Activo
+            const p = localStorage.getItem('activePlan');
+            if (p) weeklyPlan = JSON.parse(p);
+
+            // Cargar Archivos
+            const s = localStorage.getItem('savedPlans');
+            if (s) savedPlans = JSON.parse(s);
+
+            renderPlan();
+            renderSavedList();
+        }
+
+        // --- LÓGICA DE NEGOCIO ---
+        function calculateBase() {
+            const w = 80; // Valores por defecto
+            const h = 180;
+            const a = 30;
+            const bmr = 88.362 + (13.397*w) + (4.799*h) - (5.677*a);
+            const tdee = bmr * 1.55; 
+            const k = Math.round(tdee);
+            const p = 160; const f = 80; const c = Math.round((k - (p*4 + f*9))/4);
+            
+            const days = ["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"];
+            days.forEach(d => {
+                targets[d] = { k: k, p: p, c: c, f: f };
+            });
+            localStorage.setItem('userTargets', JSON.stringify(targets));
+            renderCycleTable();
+        }
+
+        function calcTargets() {
+            const w = parseFloat(document.getElementById('weight').value);
+            const h = parseFloat(document.getElementById('height').value);
+            const a = parseFloat(document.getElementById('age').value);
+            const act = parseFloat(document.getElementById('act').value);
+            const goal = parseFloat(document.getElementById('goal').value);
+            
+            const bmr = 88.362 + (13.397*w) + (4.799*h) - (5.677*a);
+            const tdee = bmr * act;
+            const k = Math.round(tdee * (1 + goal));
+            const p = Math.round(w * 2);
+            const f = Math.round(w * 1);
+            const c = Math.round((k - (p*4 + f*9)) / 4);
+
+            const days = ["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"];
+            days.forEach(d => {
+                targets[d] = { k: k, p: p, c: c, f: f };
+            });
+            renderCycleTable();
+        }
+
+        function renderCycleTable() {
+            const tbody = document.getElementById('cycle-body');
+            tbody.innerHTML = '';
+            const days = ["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"];
+            days.forEach(d => {
+                const t = targets[d];
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${d}</td>
+                        <td>${t.k}</td>
+                        <td>${t.p}</td>
+                        <td>${t.c}</td>
+                        <td>${t.f}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function closeModal() {
+            localStorage.setItem('userTargets', JSON.stringify(targets));
+            document.getElementById('modal').style.display = 'none';
+            renderPlan();
+        }
+
+        // --- UI RENDER ---
+        function setDay(day, el) {
+            activeDay = day;
+            document.querySelectorAll('.day-pill').forEach(x => x.classList.remove('active'));
+            el.classList.add('active');
+            renderPlan();
+        }
+
+        function filterCat(cat, el) {
+            activeCat = cat;
+            document.querySelectorAll('.cat-pill').forEach(x => x.classList.remove('selected'));
+            el.classList.add('selected');
+            renderLib();
+        }
+
+        function switchView(viewId, el) {
+            document.querySelectorAll('.view').forEach(x => x.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
+            el.classList.add('active');
+            if(viewId === 'view-library') renderLib();
+        }
+
+        function renderLib() {
+            const list = document.getElementById('lib-list');
+            const term = document.getElementById('search').value.toLowerCase();
+            list.innerHTML = '';
+
+            const filtered = foodDB.filter(x => {
+                let matchCat = x.type === activeCat;
+                if(activeCat === 'Tentempié' && (x.type.includes('Media') || x.type.includes('M.MAÑANA'))) matchCat = true;
+                return matchCat && (x.name.toLowerCase().includes(term) || x.ings.toLowerCase().includes(term));
+            });
+
+            filtered.forEach(x => {
+                const div = document.createElement('div');
+                div.className = 'meal-item';
+                div.innerHTML = `
+                    <div class="meal-type">${x.type}</div>
+                    <div class="meal-name">${x.name}</div>
+                    <div class="meal-meta">🔥 ${x.kcal} | P:${x.p} C:${x.c} G:${x.f}</div>
+                    <div style="font-size:12px; color:#999; margin-top:5px;">${x.ings}</div>
+                    <button class="add-btn" style="position:absolute; right:15px; top:35%;" onclick="addFood(${x.id})">+</button>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        function addFood(id) {
+            const item = foodDB.find(x => x.id === id);
+            weeklyPlan[activeDay].push(item);
+            localStorage.setItem('activePlan', JSON.stringify(weeklyPlan));
+            alert("Añadido al " + activeDay);
+        }
+
+        function renderPlan() {
+            const list = document.getElementById('planner-list');
+            list.innerHTML = '';
+            let totals = { k:0, p:0, c:0, f:0 };
+
+            weeklyPlan[activeDay].forEach((x, idx) => {
+                totals.k += x.kcal; totals.p += x.p; totals.c += x.c; totals.f += x.f;
+                const div = document.createElement('div');
+                div.className = 'meal-item';
+                div.innerHTML = `
+                    <div class="meal-type">${x.type}</div>
+                    <div class="meal-name">${x.name}</div>
+                    <div class="meal-meta">🔥 ${x.kcal} | P:${x.p} C:${x.c} G:${x.f}</div>
+                    <button class="btn-delete" onclick="removeFood(${idx})">&times;</button>
+                `;
+                list.appendChild(div);
+            });
+
+            if(weeklyPlan[activeDay].length === 0) {
+                list.innerHTML = `<div style="text-align:center; padding:40px; color:#999;"><p>No hay comidas hoy.</p><p>Ve a "Alimentos" para añadir.</p></div>`;
+            }
+
+            updateStats(totals);
+        }
+
+        function removeFood(idx) {
+            weeklyPlan[activeDay].splice(idx, 1);
+            localStorage.setItem('activePlan', JSON.stringify(weeklyPlan));
+            renderPlan();
+        }
+
+        function updateStats(cur) {
+            const tgt = targets[activeDay] || {k:2500, p:160, c:300, f:70};
+            
+            document.getElementById('val-k').innerText = cur.k + ' / ' + tgt.k;
+            document.getElementById('val-p').innerText = cur.p + ' / ' + tgt.p;
+            document.getElementById('val-c').innerText = cur.c + ' / ' + tgt.c;
+            document.getElementById('val-f').innerText = cur.f + ' / ' + tgt.f;
+
+            document.getElementById('bar-k').style.width = Math.min((cur.k/tgt.k)*100, 100) + '%';
+            document.getElementById('bar-p').style.width = Math.min((cur.p/tgt.p)*100, 100) + '%';
+            document.getElementById('bar-c').style.width = Math.min((cur.c/tgt.c)*100, 100) + '%';
+            document.getElementById('bar-f').style.width = Math.min((cur.f/tgt.f)*100, 100) + '%';
+        }
+
+        // --- SAVED PLANS LOGIC ---
+        function openSaveModal() { document.getElementById('save-modal').style.display = 'flex'; }
+        
+        function saveCurrentPlan() {
+            const name = document.getElementById('plan-name').value;
+            if(!name) return;
+            savedPlans[name] = JSON.parse(JSON.stringify(weeklyPlan));
+            localStorage.setItem('savedPlans', JSON.stringify(savedPlans));
+            renderSavedList();
+            document.getElementById('save-modal').style.display = 'none';
+        }
+
+        function loadPlan(name) {
+            if(confirm("¿Cargar el plan " + name + "? Esto reemplazará tu semana actual.")) {
+                weeklyPlan = JSON.parse(JSON.stringify(savedPlans[name]));
+                localStorage.setItem('activePlan', JSON.stringify(weeklyPlan));
+                renderPlan();
+                alert("Plan cargado.");
+            }
+        }
+
+        function deletePlan(name) {
+            if(confirm("¿Borrar " + name + "?")) {
+                delete savedPlans[name];
+                localStorage.setItem('savedPlans', JSON.stringify(savedPlans));
+                renderSavedList();
+            }
+        }
+
+        function renderSavedList() {
+            const c = document.getElementById('saved-list');
+            c.innerHTML = '';
+            Object.keys(savedPlans).forEach(name => {
+                const div = document.createElement('div');
+                div.className = 'saved-card';
+                div.innerHTML = `
+                    <span style="font-weight:bold; font-size:16px;">${name}</span>
+                    <div>
+                        <button class="btn-main" onclick="loadPlan('${name}')">Cargar</button>
+                        <button class="btn-main" style="background:var(--danger); margin-left:10px;" onclick="deletePlan('${name}')">🗑️</button>
+                    </div>
+                `;
+                c.appendChild(div);
+            });
+        }
+
+        // INIT
+        initApp();
+        renderLib();
+    </script>
+</body>
+</html>
