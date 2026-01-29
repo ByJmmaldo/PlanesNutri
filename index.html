@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>MaldoFit NEON</title>
     <style>
         :root {
@@ -245,7 +247,7 @@
             <select id="act" class="form-select">
                 <option value="1.2">Sedentario</option>
                 <option value="1.375">Ligero (1-3 días)</option>
-                <option value="1.55" selected>CrossFit (3-5 días)</option>
+                <option value="1.55" selected>Moderado (CrossFit 3-5 días)</option>
                 <option value="1.725">Alto (6-7 días)</option>
                 <option value="1.9">Atleta Profesional</option>
             </select>
@@ -286,221 +288,411 @@
     </nav>
 
     <script>
-        // --- BASE DE DATOS FINAL (355 PLATOS) ---
+        // --- BASE DE DATOS FINAL (366 PLATOS) ---
         const foodDB = [
-            // DESAYUNOS
-            {id:1001,type:"Desayuno",name:"Tortilla 4 Huevos con Jamón",kcal:450,p:35,c:5,f:30,ings:"Huevos (4), Jamón cocido (40g), Queso (30g), Pan blanco (2 reb)"},
-            {id:1002,type:"Desayuno",name:"Ricotta con Mango y Pistacho",kcal:380,p:25,c:30,f:18,ings:"Queso Ricotta (150g), Mango (100g), Proteína (15g), Pistachos (30g)"},
-            {id:1003,type:"Desayuno",name:"Pan Blanco con Jamón y Queso",kcal:320,p:15,c:40,f:10,ings:"Pan blanco (2 rebanadas), Jamón cocido (40g), Queso (30g)"},
-            {id:1,type:"Desayuno",name:"Desayuno Completo Pavo",kcal:781,p:30,c:120,f:20,ings:"Leche (150g), Pan (100g), Pavo (45g), Queso (45g), Plátano (125g)"},
-            {id:7,type:"Desayuno",name:"Bebida Avena y Tostada",kcal:530,p:20,c:80,f:15,ings:"Bebida avena (300g), Pan integral (100g), Pavo (45g), Aceite (8g)"},
-            {id:21,type:"Desayuno",name:"Pan Integral con Almendras",kcal:657,p:26,c:95,f:21,ings:"Leche (225g), Bebida almendras (225g), Pan (70g), Pavo (30g)"},
-            {id:40,type:"Desayuno",name:"Tortitas de Avena Claras",kcal:557,p:27,c:66,f:21,ings:"Claras (105g), Avena (30g), Miel (10g), Nueces (15g)"},
-            {id:91,type:"Desayuno",name:"Porridge de avena",kcal:330,p:12,c:55,f:6,ings:"Leche desnatada (250g), Avena (50g), Canela"},
-            {id:76,type:"Desayuno",name:"Bowl Avena y Yogur",kcal:693,p:27,c:84,f:28,ings:"Leche (150g), Yogur (250g), Avena (60g), Chocolate (40g)"},
-            {id:167,type:"Desayuno",name:"Gofres de avena",kcal:310,p:12,c:45,f:8,ings:"Harina avena (50g), Huevo (1), Leche (50ml)"},
-            
-            // MEDIA MAÑANA / TENTEMPIÉ
-            {id:1004,type:"Tentempié",name:"Papilla Arroz Proteína",kcal:380,p:30,c:60,f:2,ings:"Harina arroz (70g), Proteína (30g), Miel (20g), Arándanos"},
-            {id:2,type:"Tentempié",name:"Yogur Griego con Granada",kcal:335,p:11,c:46,f:14,ings:"Yogur griego (125g), Avellana (15g), Granada (200g)"},
-            {id:8,type:"Tentempié",name:"Bocadillo Bonito",kcal:305,p:20,c:37,f:7,ings:"Pan (70g), Bonito (55g), Tomate (90g)"},
-            {id:12,type:"Tentempié",name:"Bocadillo Sardinas",kcal:325,p:18,c:37,f:10,ings:"Pan (70g), Sardinas (60g), Tomate (30g)"},
-            {id:33,type:"Tentempié",name:"Tortitas Arroz Guacamole",kcal:280,p:12,c:35,f:9,ings:"Tortitas (30g), Guacamole (30g), Jamón (50g)"},
-            {id:50,type:"Tentempié",name:"Mandarina y Avellanas",kcal:95,p:1,c:16,f:3,ings:"Mandarina (120g), Avellana (5g)"},
-            {id:56,type:"Tentempié",name:"Bocadillo tortilla aguacate",kcal:403,p:18,c:39,f:19,ings:"Pan (70g), Aguacate (50g), Huevo (60g), Claras (35g)"},
-            {id:79,type:"Tentempié",name:"Tostada Tomate y Jamón",kcal:386,p:23,c:52,f:8,ings:"Pan integral (100g), Tomate (75g), Jamón serrano (45g)"},
-            
-            // COMIDA
-            {id:1006,type:"Comida",name:"Pollo con Almendras",kcal:550,p:45,c:20,f:30,ings:"Pollo (200g), Almendras (50g), Zanahoria (100g), Pan (40g)"},
-            {id:1007,type:"Comida",name:"Ensalada Pasta Langostinos",kcal:420,p:30,c:55,f:10,ings:"Pasta maíz (40g), Langostinos (50g), Huevos (3), Verduras"},
-            {id:1008,type:"Comida",name:"Patata Asada y Ternera",kcal:600,p:40,c:60,f:20,ings:"Patata asada (300g), Ternera (180g), Aguacate (1)"},
-            {id:3,type:"Comida",name:"Alubias con acelgas",kcal:329,p:16,c:52,f:6,ings:"Alubias (210g), Patata (100g), Acelgas (100g)"},
-            {id:4,type:"Comida",name:"Pollo asado",kcal:510,p:60,c:6,f:27,ings:"Pollo asado (300g)"},
-            {id:10,type:"Comida",name:"Salmón plancha y maíz",kcal:505,p:36,c:16,f:32,ings:"Salmón (170g), Zanahoria (80g), Maíz (50g)"},
-            {id:13,type:"Comida",name:"Lentejas con Pimiento",kcal:288,p:15,c:50,f:5,ings:"Lentejas (200g), Pimiento (150g)"},
-            {id:17,type:"Comida",name:"Arroz con Anchoas",kcal:300,p:9,c:35,f:14,ings:"Arroz (125g), Anchoas (20g), Nueces (15g)"},
-            {id:25,type:"Comida",name:"Arroz con Surimi",kcal:350,p:10,c:40,f:14,ings:"Arroz (125g), Surimi (60g), Aguacate (40g)"},
-            {id:29,type:"Comida",name:"Garbanzos con Atún",kcal:606,p:50,c:64,f:17,ings:"Garbanzos (200g), Atún (110g), Tomate (150g)"},
-            {id:55,type:"Comida",name:"Espaguetis a la pimienta",kcal:350,p:10,c:60,f:8,ings:"Espagueti (80g), Aceite (5g), Ajo, Tomate (50g)"},
-            {id:73,type:"Comida",name:"Pollo al ajillo",kcal:502,p:25,c:22,f:30,ings:"Pollo (150g), Yogur (125g)"},
-            {id:83,type:"Comida",name:"Arroz tres delicias y Salmón",kcal:647,p:41,c:43,f:32,ings:"Arroz (125g), Salmón (170g)"},
-            
-            // MERIENDA
-            {id:1005,type:"Merienda",name:"Puré Verduras y Boquerones",kcal:350,p:25,c:30,f:15,ings:"Puré, Pan (80g), Boquerones (60g), Queso fresco (200g)"},
-            {id:5,type:"Merienda",name:"Pan Centeno y Hummus",kcal:192,p:6,c:37,f:2,ings:"Pan centeno (40g), Hummus (15g), Naranja (130g)"},
-            {id:6,type:"Merienda",name:"Bocadillo Pavo Tomate",kcal:129,p:7,c:21,f:1,ings:"Pan (40g), Tomate (45g), Pavo (15g)"},
-            {id:31,type:"Merienda",name:"Plátano",kcal:178,p:2,c:46,f:0,ings:"Plátano (200g)"},
-            {id:52,type:"Merienda",name:"Pan Wasa y Atún",kcal:294,p:24,c:33,f:6,ings:"Pan Wasa (40g), Atún (56g), Guisantes (145g)"},
-            {id:99,type:"Merienda",name:"Batido de proteínas",kcal:150,p:25,c:5,f:2,ings:"Proteína (30g), Agua"},
-            {id:109,type:"Merienda",name:"Queso batido y nueces",kcal:180,p:12,c:8,f:10,ings:"Queso batido (150g), Nueces (10g)"},
-            
-            // CENA
-            {id:1010,type:"Cena",name:"Sepia plancha con Arroz",kcal:420,p:35,c:45,f:8,ings:"Sepia (200g), Arroz (60g), Verduras"},
-            {id:1011,type:"Cena",name:"Atún horno y Boniato",kcal:350,p:30,c:35,f:10,ings:"Atún (150g), Boniato (150g)"},
-            {id:7,type:"Cena",name:"Tortilla espinacas",kcal:166,p:13,c:2,f:11,ings:"Claras (35g), Huevo (60g), Espinaca (50g)"},
-            {id:16,type:"Cena",name:"Lenguado con Brócoli",kcal:329,p:52,c:8,f:10,ings:"Lenguado (270g), Brócoli (125g)"},
-            {id:28,type:"Cena",name:"Caballa con Canónigos",kcal:383,p:30,c:6,f:26,ings:"Caballa (150g), Canónigos (30g), Maíz (30g)"},
-            {id:36,type:"Cena",name:"Trucha con Acelgas",kcal:317,p:9,c:43,f:12,ings:"Trucha (450g), Acelgas (150g), Pan (70g)"},
-            {id:63,type:"Cena",name:"Tortilla de calabacín",kcal:257,p:20,c:5,f:16,ings:"Huevo (60g), Calabacín (125g), Claras (105g)"},
-            {id:104,type:"Cena",name:"Crema calabacín y pavo",kcal:280,p:20,c:20,f:10,ings:"Calabacín (200g), Patata (50g), Pavo (100g)"}
-        ];
+{id:1,type:"Desayuno",name:"Desayuno: Leche entera...",kcal:781,p:30,c:120,f:20,ings:"Leche entera (150g), vaso pequeño) , Café (infusión) (50g), Pan blanco (100g),  Pera (220g), unidad grande) , Pechuga de pavo (fiambre) (45g), lonchas) ,Queso de untar ligero (45g), Plátano, banano (125g), unidad pequeña) , Nuez pelada (5g)"},
+{id:2,type:"Tentempié",name:"Tentempié Alternativo",kcal:335,p:11,c:46,f:14,ings:"Yogur griego (125g), unidad) , Avellana sin cáscara (15g), unidades) , Granada (200g)"},
+{id:3,type:"Comida",name:"Alubias con acelgas ypatata",kcal:329,p:16,c:52,f:6,ings:"Alubias/ frijoles cocidas (en conserva)/ porotos cocidos (210g), g) , Patata (100g), unidad pequeña) , Acelgas (100g), plato mediano) , Aceite de oliva (5g)"},
+{id:4,type:"Comida",name:"Pollo asado en su jugocomercial",kcal:495,p:93,c:0,f:12,ings:"Pollo asado en su jugo comercial (300g)"},
+{id:5,type:"Comida",name:"1. Colocar el producto con su envase original dentro de un r",kcal:425,p:3,c:5,f:45,ings:"Yogur natural desnatado (125g)"},
+{id:6,type:"Merienda",name:"Merienda Alternativo",kcal:192,p:6,c:37,f:2,ings:"Pan de centeno (40g), ) , Hummus (15g), Naranja (130g)"},
+{id:7,type:"Cena",name:"Tortilla de espinacas yqueso fresco",kcal:166,p:13,c:2,f:11,ings:"Clara de huevo pasteurizada (35g), unidad) , Huevo de gallina (60g), unidad talla M) , Espinaca (50g), MG (62g),  Aceite de oliva (5g)"},
+{id:8,type:"Desayuno",name:"Desayuno: Leche entera...",kcal:1687,p:76,c:258,f:39,ings:"Leche entera (225g), vaso grande) , Café (infusión) (50g), Bebida de avena (300g), taza) , Pan integral de trigo (100g),  Pechuga de pavo (fiambre) (45g), lonchas) , Aceite de oliva (8g)"},
+{id:9,type:"Tentempié",name:"Bocadillo de bonito ytomate",kcal:687,p:7,c:37,f:57,ings:"Pan blanco (70g),  Bonito en aceite (55g), lata redonda pequeña) , Tomate crudo (90g)"},
+{id:10,type:"Comida",name:"Espaguetis con yogurdesnatado y pechuga depavo",kcal:340,p:14,c:20,f:23,ings:"Yogur natural desnatado (60g),  Pechuga de pavo (fiambre) (40g), lonchas) , Espagueti (60g)"},
+{id:11,type:"Comida",name:"Salmón a la plancha conzanahoria y maíz",kcal:581,p:56,c:9,f:33,ings:"Salmón (170g), rodaja/lomo) , Zanahoria (80g), g)) , Maíz dulce enlatado (50g), lata pequeña) , Aceite de oliva (8g)"},
+{id:12,type:"Comida",name:"Pescado",kcal:425,p:3,c:5,f:45,ings:"Yogur natural desnatado (125g)"},
+{id:13,type:"Merienda",name:"Bocadillo integral depavo y tomate",kcal:129,p:7,c:21,f:1,ings:"Pan integral de trigo (40g), ) , Tomate crudo (45g), rodajas) , Pechugade pavo (fiambre) (15g)"},
+{id:14,type:"Cena",name:"Atún a la plancha conberenjenas",kcal:276,p:43,c:9,f:6,ings:"Aceite de oliva (5g), cucharada de postre) , Berenjena (150g), unidad grande) , Atún (150g)"},
+{id:15,type:"Cena",name:"Pescado",kcal:80,p:1,c:20,f:0,ings:"Piña natural (160g)"},
+{id:16,type:"Desayuno",name:"Desayuno: Leche entera...",kcal:486,p:19,c:74,f:12,ings:"Leche entera (225g), vaso grande) , Café (infusión) (50g), Yogur natural (125g), unidad) , Pan blanco (70g),  Manteca de cacahuete (30g),  Plátano,banano (100g), unidad grande) , Canela (1g)"},
+{id:17,type:"Tentempié",name:"Bocadillo de sardinascon tomate",kcal:721,p:6,c:35,f:62,ings:"Pan blanco (70g),  Tomate triturado natural (30g),  Sardinas en aceite (60g)"},
+{id:18,type:"Comida",name:"Lentejas con pimiento",kcal:277,p:17,c:42,f:5,ings:"Lentejas cocidas (175g), vaso) , Pimiento rojo (75g), unidad pequeña) , Pimiento verde (75g), unidad pequeña) ,Aceite de oliva (5g)"},
+{id:19,type:"Comida",name:"Lomo de cerdo a laplancha con patatasasadas",kcal:518,p:38,c:25,f:28,ings:"Lomo de cerdo (130g), filetes) , Aceite de oliva (10g), cucharada sopera) , Patata (150g)"},
+{id:20,type:"Comida",name:"1. Asar las cortadas de lomo de cerdo en la plancha caliente",kcal:425,p:3,c:5,f:45,ings:"Yogur natural desnatado (125g)"},
+{id:21,type:"Merienda",name:"Merienda del Varios",kcal:192,p:6,c:37,f:2,ings:"Pan de centeno (40g), ) , Hummus (15g), Naranja (130g)"},
+{id:22,type:"Cena",name:"Lenguado a la planchacon brócoli",kcal:329,p:52,c:8,f:10,ings:"Lenguado (270g), unidades pequeñas) , Brócoli (125g), floretas) , Aceite de oliva (5g)"},
+{id:23,type:"Cena",name:"Pescado",kcal:107,p:1,c:27,f:0,ings:"Uva negra (160g)"},
+{id:24,type:"Comida",name:"Arroz blanco paramicroondas con nuecesy anchoas",kcal:378,p:4,c:24,f:29,ings:"Arroz blanco para microondas (80g),  Anchoas en aceite (20g), unidades) , Nuez pelada (15g), MG (75g)"},
+{id:25,type:"Comida",name:"Caballa a la plancha conbrócoli",kcal:496,p:41,c:8,f:33,ings:"Caballa (200g),  Brócoli (125g), floretas) , Aceite de oliva (5g)"},
+{id:26,type:"Cena",name:"Tortilla francesa contomate, cebolla yaceitunas",kcal:229,p:9,c:11,f:16,ings:"Huevo de gallina (60g), unidad talla M) , Aceite de oliva (8g), cucharada de postre) , Tomatecrudo (150g), tomate pequeño tipo raff) , Cebolla blanca (40g), unidad pequeña) , Aceituna verde (20g)"},
+{id:27,type:"Cena",name:"Huevos",kcal:78,p:0,c:21,f:0,ings:"Manzana roja (150g)"},
+{id:28,type:"Desayuno",name:"Desayuno: Leche entera...",kcal:1657,p:66,c:95,f:121,ings:"Leche entera (225g), vaso grande) , Café (infusión) (50g), Bebida de almendras (225g), vaso grande) , Pan integral de trigo (70g),  Pechuga depavo (fiambre) (30g)"},
+{id:29,type:"Comida",name:"Macarrones con tomate",kcal:137,p:5,c:27,f:0,ings:"Macarrones (80g), ml) , Tomate frito comercial (60g), ml) , Orégano (2g)"},
+{id:30,type:"Merienda",name:"Bocadillo integral desalmón ahumado ytomate",kcal:322,p:9,c:68,f:2,ings:"Pan integral de trigo (70g),  Tomate crudo (90g), tomate pequeño tipo pera) , Salmónahumado (30g), Naranja (220g)"},
+{id:31,type:"Cena",name:"Pechuga de pollo a laplancha con lechuga ytomate",kcal:457,p:64,c:8,f:18,ings:"Aceite de oliva (10g), cucharada sopera) , Lechuga (80g), hojas grandes) , Tomate crudo (150g), tomatepequeño tipo raff) , Pollo, pechuga, solomillo (200g)"},
+{id:32,type:"Cena",name:"1. Asar a la plancha la pechuga de pollo. Le podemos añadir ",kcal:78,p:0,c:21,f:0,ings:"Manzana roja (150g)"},
+{id:33,type:"Desayuno",name:"Desayuno: Leche entera...",kcal:343,p:13,c:51,f:9,ings:"Leche entera (150g), vaso pequeño) , Café (infusión) (50g), Yogur natural (125g), unidad) , Pan blanco (40g), g) , Manteca decacahuete (15g),  Plátano, banano (80g), unidad grande) , Canela (1g)"},
+{id:34,type:"Comida",name:"Garbanzos conespinacas",kcal:397,p:20,c:60,f:10,ings:"Aceite de oliva (5g), cucharada de postre) , Ajo (5g), diente) , Cebolla o cebolleta (75g), cebolleta) , Espinaca (125g), plato mediano) , Garbanzos cocidos (175g)"},
+{id:35,type:"Comida",name:"Sepia a la plancha conaguacate, mozzarella ypiñones",kcal:256,p:21,c:6,f:17,ings:"Aceite de oliva (5g), cucharada de postre) , Mozzarella Fresca Light (50g), debola) , Sepia (125g), ) , Aguacate/ palta (50g), pieza) , Piñones sin cáscara (5g)"},
+{id:36,type:"Comida",name:"Crustáceos, lácteos,pescado, frutos secos,moluscos",kcal:425,p:3,c:5,f:45,ings:"Yogur natural desnatado (125g)"},
+{id:37,type:"Merienda",name:"Merienda del Varios",kcal:285,p:10,c:49,f:6,ings:"Pan integral de trigo (40g), ) , Jamón serrano (15g), Plátano, banano (125g), unidad pequeña) , Nuez pelada (5g)"},
+{id:38,type:"Cena",name:"Pechuga de pavo a laplancha con tomate yzanahoria",kcal:199,p:28,c:5,f:7,ings:"Pavo, pechuga (fresco) (125g), filete pequeño) , Aceite de oliva (5g), cucharada de postre) , Tomate crudo (45g), rodajas) , Zanahoria (40g)"},
+{id:39,type:"Cena",name:"1. Asar a la plancha la pechuga de pavo. La podemos sazonar ",kcal:62,p:0,c:16,f:0,ings:"Manzana roja (120g)"},
+{id:40,type:"Desayuno",name:"Desayuno: Leche entera...",kcal:455,p:14,c:77,f:10,ings:"Leche entera (150g), vaso pequeño) , Café (infusión) (50g), Pan blanco (40g), g) , Manzana roja (150g), unidad pequeña) , Jamónserrano (15g), Plátano, banano (125g), unidad pequeña) , Nuez pelada (5g)"},
+{id:41,type:"Comida",name:"Arroz con surimi yaguacate",kcal:295,p:4,c:28,f:20,ings:"Arroz blanco crudo (70g), ml) , Surimi (32g), unidades) ,Aguacate/ palta (100g), pieza) , Aceite de oliva (5g)"},
+{id:42,type:"Comida",name:"Filete de atún en salsacomercial",kcal:130,p:28,c:0,f:1,ings:"Filete de atún en salsa comercial (100g)"},
+{id:43,type:"Merienda",name:"Bocadillo integral desalmón ahumado ytomate",kcal:289,p:9,c:50,f:6,ings:"Pan integral de trigo (40g), ) , Tomate crudo (45g), rodajas) ,Salmón ahumado (15g), Plátano, banano (125g), unidad pequeña) , Nuez pelada (5g)"},
+{id:44,type:"Cena",name:"Caballa a la plancha concanónigos y maíz",kcal:383,p:30,c:6,f:26,ings:"Caballa (150g), ) , Canónigos (30g),  Maíz dulce enlatado (30g), cucharas soperas) , Aceite de oliva (5g)"},
+{id:45,type:"Cena",name:"Pescado",kcal:62,p:0,c:16,f:0,ings:"Manzana roja (120g)"},
+{id:46,type:"Desayuno",name:"Desayuno: Leche entera...",kcal:446,p:26,c:65,f:9,ings:"Leche entera (225g), vaso grande) , Café (infusión) (50g), Naranja (270g), unidad grande) , Pechuga de pavo (fiambre) (60g), MG (140g), tarrinas) , Pan tostado de trigo (biscote) (45g)"},
+{id:47,type:"Tentempié",name:"Tentempié Alternativo",kcal:316,p:6,c:56,f:10,ings:"Plátano, banano (225g), unidad grande) , Almendra sin cáscara (20g)"},
+{id:48,type:"Comida",name:"Garbanzos con tomate,atún y cebolla",kcal:606,p:50,c:64,f:17,ings:"Garbanzos cocidos (200g), g) , Tomate crudo (150g), tomate pequeño tipo raff) , Cebolla blanca (50g), unidad pequeña) , Atún enlatado en agua (110g), lataspequeñas redondas) , Aceite de oliva (10g), cucharada sopera) , Sal común (0g)"},
+{id:49,type:"Comida",name:"Pechuga de pollocomercial con minimazorca de maíz",kcal:280,p:52,c:0,f:6,ings:"Pechuga de pollo cocinada comercial (170g),  Maiz cocido mini mazorca comercial (300g)"},
+{id:50,type:"Comida",name:"1. Abrir la lata de pollo, colocarlo en un recipiente adecua",kcal:95,p:1,c:23,f:0,ings:"Mandarina (180g)"},
+{id:51,type:"Merienda",name:"Enrollado de salmónahumado y guacamole",kcal:122,p:10,c:0,f:8,ings:"Fajita integral (Tortilla mejicana de trigo integral) (40g), unidad) , Guacamole (40g), Salmón ahumado (30g)"},
+{id:52,type:"Merienda",name:"Crustáceos, lácteos,soja, pescado, sulfitos,moluscos, gluten",kcal:178,p:2,c:46,f:0,ings:"Plátano, banano (200g)"},
+{id:53,type:"Cena",name:"Cena del Varios",kcal:658,p:49,c:35,f:35,ings:"Pan integral de trigo (70g), Huevo de gallina (120g), unidades talla M) , Aceite de oliva (8g), cucharada de postre) ,Jamón serrano (90g)"},
+{id:54,type:"Cena",name:"Huevos",kcal:73,p:1,c:18,f:0,ings:"Kiwi (120g)"},
+{id:55,type:"Desayuno",name:"Desayuno: Leche entera...",kcal:757,p:30,c:107,f:22,ings:"Leche entera (225g), vaso grande) , Café (infusión) (50g), Plátano, banano (160g), unidad mediana) , Leche desnatada calcio UHT (400g), tazón) , Avena (60g)"},
+{id:56,type:"Tentempié",name:"Tortitas de arrozcomerciales conguacamole y jamóncocido",kcal:99,p:9,c:5,f:3,ings:"Tortitas de arroz (21g), unidades) , Guacamole (40g),  Jamón cocido (30g)"},
+{id:57,type:"Comida",name:"Lasaña de salmón ybrócoli comercial",kcal:807,p:66,c:25,f:50,ings:"Lasaña de salmón y brócoli comercial (250g), Caballa (300g), ) , Aceite de oliva (8g), cucharada de postre) , Tomate crudo (200g), tomate mediano) , Perejil (5g)"},
+{id:58,type:"Comida",name:"Pescado",kcal:73,p:1,c:18,f:0,ings:"Kiwi (120g)"},
+{id:59,type:"Merienda",name:"Merienda del Varios",kcal:253,p:11,c:31,f:8,ings:"Leche desnatada UHT (225g), vaso grande) , Avena (30g)"},
+{id:60,type:"Cena",name:"Cena del Varios",kcal:317,p:9,c:43,f:12,ings:"Pan integral de trigo (70g), Trucha (450g), ) , Aceite de oliva (10g), cucharada sopera) , Acelgas (150g), plato mediano) , Ajo (10g)"},
+{id:61,type:"Cena",name:"Pescado",kcal:96,p:1,c:24,f:0,ings:"Mango (160g)"},
+{id:62,type:"Comida",name:"Alubias con tomate ysésamo",kcal:228,p:11,c:32,f:5,ings:"Alubias/ frijoles cocidas (en conserva)/ porotos cocidos (175g), vaso) , Tomatecrudo (100g), tomate pequeño tipo pera) , Semillas de sésamo blancas (15g), cuchara sopera) , Aceitede oliva (5g)"},
+{id:63,type:"Comida",name:"Solomillo de cerdo conzanahoria y lechuga",kcal:765,p:69,c:17,f:45,ings:"Aceite de oliva (10g), cucharada sopera) , Lechuga (100g), bol grande) , Zanahoria (140g), unidad grande) ,Solomillo de cerdo (250g)"},
+{id:64,type:"Comida",name:"1. Asar el solomillo de cerdo cortado en medallones en la pl",kcal:78,p:0,c:21,f:0,ings:"Manzana roja (150g)"},
+{id:65,type:"Cena",name:"Cena del Varios",kcal:682,p:75,c:51,f:19,ings:"Pan integral de trigo (70g), Dorada (370g), ) , Cebolla o cebolleta (100g), cebolleta) ,Tomate crudo (200g), tomate mediano) , Aceite de oliva (10g)"},
+{id:66,type:"Cena",name:"Pescado",kcal:73,p:1,c:18,f:0,ings:"Kiwi (120g)"},
+{id:67,type:"Desayuno",name:"Desayuno: Leche entera...",kcal:557,p:27,c:66,f:21,ings:"Leche entera (225g), vaso grande) , Café (infusión) (50g), Zumo de naranja natural (200g), vaso grande) , Clara de huevo pasteurizada (105g), unidades) ,Aceite de oliva (3g), cucharada de café) , Harina de avena (30g), cucharadas soperas rasas) , Miel (10g),  Nuez pelada (15g)"},
+{id:68,type:"Comida",name:"Arroz con pepino ytomate",kcal:281,p:5,c:42,f:10,ings:"Arroz blanco crudo (120g), ml) , Pepino (125g), unidad mediana) , Tomate crudo (100g), tomate pequeño tipo pera) , Aceite de oliva (10g)"},
+{id:69,type:"Comida",name:"1. Cocer el arroz en un cazo con el doble de agua, durante 1",kcal:95,p:1,c:23,f:0,ings:"Mandarina (180g)"},
+{id:70,type:"Merienda",name:"Merienda Alternativo",kcal:358,p:16,c:44,f:12,ings:"Leche desnatada UHT (300g), taza) , Avena (45g)"},
+{id:71,type:"Cena",name:"Cena del Varios",kcal:426,p:28,c:39,f:16,ings:"Pan integral de trigo (70g), Clara de huevo pasteurizada (105g), unidades) , Huevo de gallina (60g), unidad talla M) , Espinaca (100g), MG (75g), tarrina) , Aceite de oliva (8g)"},
+{id:72,type:"Comida",name:"Espirales con tomate yanchoas",kcal:360,p:1,c:5,f:38,ings:"Espirales (90g), ml) , Tomate crudo (120g), tomatepequeño tipo raff) , Anchoas en aceite (28g), unidades) , Aceite de oliva (10g), cucharada sopera) , Albahaca (5g)"},
+{id:73,type:"Comida",name:"Pechuga de pavo a laplancha con rúcula yzanahoria",kcal:279,p:39,c:6,f:11,ings:"Pavo, pechuga (fresco) (175g), filete mediano) , Aceite de oliva (8g), cucharada de postre) , Rúcula (50g), Zanahoria (60g)"},
+{id:74,type:"Comida",name:"1. Asar a la plancha la pechuga de pavo. 2. Rallar la zanaho",kcal:108,p:0,c:28,f:0,ings:"Pera (190g)"},
+{id:75,type:"Cena",name:"Cena del Varios",kcal:466,p:58,c:34,f:8,ings:"Pan integral de trigo (70g), Pechuga de pollo cocinada comercial (170g),  Pisto de verduras comercial (175g)"},
+{id:76,type:"Cena",name:"1. Abrir la lata de pollo, colocarlo en un recipiente adecua",kcal:96,p:1,c:24,f:0,ings:"Mango (160g)"},
+{id:77,type:"Desayuno",name:"Desayuno: Leche entera...",kcal:511,p:25,c:62,f:19,ings:"Leche entera (150g), vaso pequeño) , Café (infusión) (50g), Zumo de naranja natural (200g), vaso grande) , Clara de huevo pasteurizada (105g), unidades) ,Aceite de oliva (3g), cucharada de café) , Harina de avena (30g), cucharadas soperas rasas) , Miel (10g),  Nuez pelada (15g)"},
+{id:78,type:"Comida",name:"Lentejas con tomate,nueces y queso de cabra",kcal:522,p:24,c:44,f:29,ings:"Lentejas cocidas (175g), vaso) , Nuez pelada (20g), nueces) , Queso de cabra curado (40g), loncha) , Aceite de oliva (8g), cucharada de postre) , Tomate crudo (120g)"},
+{id:79,type:"Comida",name:"Lubina a la plancha conacelgas",kcal:240,p:34,c:4,f:8,ings:"Lubina, róbalo (180g),  Aceite de oliva (5g), cucharada de postre) , Acelgas (75g), platomediano) , Ajo (5g)"},
+{id:80,type:"Comida",name:"Pescado",kcal:50,p:1,c:13,f:0,ings:"Piña natural (100g)"},
+{id:81,type:"Merienda",name:"Merienda Alternativo",kcal:671,p:6,c:34,f:57,ings:"Pan integral de trigo (70g),  Bonito en aceite (55g)"},
+{id:82,type:"Cena",name:"Cena del Varios",kcal:819,p:61,c:49,f:40,ings:"Pan integral de trigo (70g), Aceite de oliva (10g), cucharada sopera) , Rúcula (50g),  Zanahoria (80g), g)) , Lomo de cerdo (200g)"},
+{id:83,type:"Cena",name:"1. Asar las cortadas de lomo de cerdo en la plancha caliente",kcal:73,p:1,c:18,f:0,ings:"Kiwi (120g)"},
+{id:84,type:"Comida",name:"Arroz basmati con huevoduro y pipas de calabaza",kcal:251,p:11,c:23,f:12,ings:"Huevo de gallina (65g), unidad talla M) , Aceite de oliva (5g), cucharada de postre) , Tomate crudo (70g), rodajas) , Arroz basmati crudo (70g), ml) , Semillas de calabaza (10g)"},
+{id:85,type:"Comida",name:"Trucha al microondascon tomate natural",kcal:61,p:0,c:3,f:5,ings:"Trucha (200g), ) , Aceite de oliva (5g), cucharada de postre) , Tomate crudo (90g), tomate pequeño tipo pera) , Perejil (2g), (Al gusto) , Pimienta blanca (1g)"},
+{id:86,type:"Comida",name:"Pescado",kcal:95,p:1,c:23,f:0,ings:"Mandarina (180g)"},
+{id:87,type:"Merienda",name:"Bocadillo de jamónserrano y tomate frito",kcal:262,p:15,c:35,f:6,ings:"Pan blanco (70g),  Jamón serrano (30g), lonchas) , Tomate frito comercial (30g)"},
+{id:88,type:"Merienda",name:"1. Untar el pan con el tomate frito y colocar encima el jamó",kcal:142,p:1,c:36,f:0,ings:"Plátano, banano (160g)"},
+{id:89,type:"Cena",name:"Cena del Varios",kcal:566,p:64,c:46,f:12,ings:"Pan integral de trigo (70g), Aceite de oliva (8g), cucharada de postre) , Berenjena (200g), unidad pequeña) , Atún (200g)"},
+{id:90,type:"Desayuno",name:"Desayuno: Leche entera...",kcal:400,p:24,c:61,f:7,ings:"Leche entera (150g), vaso pequeño) , Café (infusión) (50g), Naranja (270g), unidad grande) , Pechuga de pavo (fiambre) (60g), MG (140g), tarrinas) , Pan tostado de trigo (biscote) (45g)"},
+{id:91,type:"Tentempié",name:"Tentempié Alternativo",kcal:217,p:6,c:43,f:3,ings:"Yogur natural (125g), unidad) , Plátano, banano (160g)"},
+{id:92,type:"Comida",name:"Solomillo de pollo contortilla francesa",kcal:439,p:65,c:1,f:17,ings:"Huevo de gallina (60g), unidad talla M) , Pollo, pechuga, solomillo (150g),  Clara de huevopasteurizada (105g), unidades) , Aceite de oliva (5g)"},
+{id:93,type:"Comida",name:"Huevos",kcal:79,p:0,c:21,f:0,ings:"Pera (140g)"},
+{id:94,type:"Merienda",name:"Yogur desnatado concacao y crema decacahuete",kcal:850,p:7,c:10,f:90,ings:"Yogur natural desnatado (250g), unidades) , Cacao en polvo desgrasado sin azúcar (10g), cucharada de postre) , Manteca de cacahuete (15g)"},
+{id:95,type:"Cena",name:"Revuelto de caballa conhummus",kcal:708,p:10,c:4,f:73,ings:"Huevo de gallina (60g), unidad talla M) , Caballa en aceite (56g),  Aceite de oliva (8g), cucharada de postre) , Hummus (30g)"},
+{id:96,type:"Desayuno",name:"Desayuno: Leche entera...",kcal:560,p:22,c:80,f:16,ings:"Leche entera (150g), vaso pequeño) , Café (infusión) (50g), Plátano, banano (125g), unidad pequeña) , Leche desnatada calcio UHT (300g), taza) ,Avena (45g)"},
+{id:97,type:"Comida",name:"Macarrones con salmónahumado y quesofresco batido",kcal:206,p:7,c:13,f:13,ings:"Macarrones (40g), ml) , Salmón ahumado (20g), loncha fina) , Quesofresco batido desnatado (30g)"},
+{id:98,type:"Comida",name:"Caballa a la plancha concanónigos y maíz",kcal:383,p:30,c:6,f:26,ings:"Caballa (150g), ) , Canónigos (30g),  Maíz dulce enlatado (30g), cucharassoperas) , Aceite de oliva (5g)"},
+{id:99,type:"Comida",name:"Pescado",kcal:84,p:1,c:21,f:0,ings:"Naranja (180g)"},
+{id:100,type:"Merienda",name:"Yogur griego conalmendras ymandarinas",kcal:1204,p:45,c:49,f:101,ings:"Yogur griego (125g), unidad) , Almendra sin cáscara (15g), almendras) , Mandarina (180g)"},
+{id:101,type:"Cena",name:"Atún a la plancha contomate y lechuga",kcal:303,p:44,c:8,f:9,ings:"Atún (150g), rodaja) , Lechuga (70g), hojas grandes) , Tomate crudo (150g), tomatepequeño tipo raff) , Aceite de oliva (8g)"},
+{id:102,type:"Cena",name:"Pescado",kcal:78,p:0,c:21,f:0,ings:"Manzana roja (150g)"},
+{id:103,type:"Tentempié",name:"Tentempié Alternativo",kcal:328,p:12,c:58,f:7,ings:"Yogur natural (250g), unidades) , Plátano, banano (200g)"},
+{id:104,type:"Comida",name:"Lentejas con tomate,nueces y queso decabra",kcal:322,p:14,c:26,f:18,ings:"Lentejas cocidas (100g), vaso) , Nuez pelada (15g), nueces) , Queso de cabra curado (20g), loncha) , Tomate crudo (90g), tomate pequeño tipo pera) , Aceite de oliva (5g)"},
+{id:105,type:"Comida",name:"Lomo de cerdo a laplancha con berenjena",kcal:604,p:56,c:12,f:36,ings:"Aceite de oliva (8g), cucharada de postre) , Berenjena (200g), unidad pequeña) , Lomo de cerdo (200g)"},
+{id:106,type:"Comida",name:"1. Asar la pechuga de pavo. 2. Escurrir el maíz y los guisan",kcal:95,p:1,c:23,f:0,ings:"Mandarina (180g)"},
+{id:107,type:"Cena",name:"Lenguado a la planchacon rúcula y tomatescherry",kcal:425,p:64,c:5,f:17,ings:"Lenguado (350g), unidades pequeñas) , Rúcula (50g),  Tomate cherry (125g),  Aceite de oliva (10g)"},
+{id:108,type:"Desayuno",name:"Zumo de naranjanatural con tortitas deavena, miel y nueces",kcal:587,p:28,c:83,f:18,ings:"Zumo de naranja natural (300g), taza) , Clara de huevo pasteurizada (140g), unidades) , Aceitede oliva (3g), cucharada de café) , Harina de avena (40g), cucharadas soperas rasas) , Miel (20g), cucharada depostre) , Nuez pelada (20g)"},
+{id:109,type:"Comida",name:"Arroz con remolacha ypepinillos",kcal:96,p:1,c:11,f:5,ings:"Arroz blanco crudo (40g), cucharadas soperas) , Aceite de oliva (5g), cucharada de postre) ,Remolacha (24g), rodajas) , Pepinillos (30g)"},
+{id:110,type:"Comida",name:"Filete de atún converduras en salsacomercial",kcal:234,p:50,c:0,f:1,ings:"Filete de atún con verduras en salsa comercial (180g)"},
+{id:111,type:"Comida",name:"Pescado",kcal:62,p:0,c:16,f:0,ings:"Manzana roja (120g)"},
+{id:112,type:"Cena",name:"Tortilla con queso cremay pimientos del piquillo",kcal:203,p:14,c:4,f:14,ings:"Queso de untar ligero (15g),  Clara de huevo pasteurizada (35g), unidad) , Huevo de gallina (60g), unidad talla M) , Aceite de oliva (5g), cucharada de postre) , Pimiento del piquillo en tiras al ajillo comercial (60g)"},
+{id:113,type:"Comida",name:"Espirales con tomate yanchoas",kcal:237,p:0,c:3,f:25,ings:"Espirales (70g), ml) , Tomate crudo (90g), tomate pequeño tipo pera) ,Anchoas en aceite (20g), unidades) , Aceite de oliva (5g), cucharada de postre) , Albahaca (5g)"},
+{id:114,type:"Comida",name:"Huevos,pescado,gluten",kcal:78,p:0,c:21,f:0,ings:"Manzana roja (150g)"},
+{id:115,type:"Cena",name:"Pechuga de pollo conpisto de verdurascomercial",kcal:280,p:52,c:0,f:6,ings:"Pechuga de pollo cocinada comercial (170g),  Pisto de verduras comercial (175g)"},
+{id:116,type:"Cena",name:"1. Abrir la lata de pollo, colocarlo en un recipiente adecua",kcal:65,p:1,c:16,f:0,ings:"Piña, enlatada en su jugo (130g)"},
+{id:117,type:"Tentempié",name:"Tortitas de arrozcomerciales conguacamole y jamóncocido",kcal:99,p:9,c:5,f:3,ings:"Tortitas de arroz (21g), unidades) , Guacamole (40g),  Jamón cocido (30g)"},
+{id:118,type:"Comida",name:"Alubias con tomate ysésamo",kcal:142,p:6,c:16,f:5,ings:"Alubias/ frijoles cocidas (en conserva)/ porotos cocidos (100g), vaso) , Tomate crudo (45g), rodajas) , Semillas de sésamo blancas (10g),  Aceite de oliva (5g)"},
+{id:119,type:"Comida",name:"Lubina a la plancha conaguacate, mozzarella ypiñones",kcal:303,p:28,c:5,f:18,ings:"Aceite de oliva (5g), cucharada de postre) , Mozzarella Fresca Light (50g), de bola) , Filete delubina (150g), filete) , Aguacate/ palta (50g), pieza) , Piñones sin cáscara (5g)"},
+{id:120,type:"Merienda",name:"Yogur griego conalmendras ymandarinas",kcal:827,p:32,c:34,f:68,ings:"Yogur griego (125g), unidad) , Almendra sin cáscara (10g), almendras) , Mandarina (120g)"},
+{id:121,type:"Cena",name:"Lomo de cerdo a laplancha con lechuga ytomate",kcal:300,p:27,c:3,f:19,ings:"Aceite de oliva (5g), cucharada de postre) , Lechuga (40g), hojas grande) , Tomate crudo (45g), rodajas) ,Lomo de cerdo (100g)"},
+{id:122,type:"Cena",name:"1. Asar las cortadas de lomo de cerdo en la plancha caliente",kcal:111,p:1,c:28,f:0,ings:"Plátano, banano (125g)"},
+{id:123,type:"Comida",name:"Arroz tres deliciascomercial",kcal:669,p:10,c:126,f:13,ings:"Arroz tres delicias comercial (300g),  Aceite de oliva (8g), Espárrago blanco (50g), espárragos medianos) , Lechuga (30g), hojas grande) , Tomate crudo (90g), tomate pequeño tipo pera) , Trucha (250g), ) , Aceite de oliva (5g)"},
+{id:124,type:"Cena",name:"Salmón a la plancha concanónigos y maíz",kcal:325,p:25,c:6,f:20,ings:"Salmón (120g),  Canónigos (30g),  Maíz dulce enlatado (30g), cucharas soperas) , Aceite de oliva (5g)"},
+{id:125,type:"Desayuno",name:"Desayuno: Yogur natural desnatado...",kcal:924,p:25,c:56,f:68,ings:"Yogur natural desnatado (125g), unidad) , Nuez pelada (10g), Pan integral de trigo (70g),  Aguacate/ palta (50g), pieza) , Pechuga de pavo (fiambre) (30g), lonchas) , Leche desnatada UHT (225g), vaso grande) , Café (infusión) (50g)"},
+{id:126,type:"Comida",name:"Ensalada de garbanzos,tomate, cebolla ypimiento verde",kcal:341,p:15,c:52,f:9,ings:"Tomate crudo (75g), rodajas) , Cebolla blanca (60g), unidad pequeña) , Pimiento verde (75g), unidad pequeña) , Garbanzos cocidos (175g), vaso) , Aceite de oliva (5g)"},
+{id:127,type:"Comida",name:"Sepia a la plancha conbrócoli",kcal:218,p:36,c:5,f:6,ings:"Aceite de oliva (5g), cucharada de postre) , Brócoli (200g), Sepia (200g)"},
+{id:128,type:"Comida",name:"Crustáceos, moluscos",kcal:96,p:1,c:24,f:0,ings:"Mango (160g)"},
+{id:129,type:"Merienda",name:"Merienda Alternativo",kcal:307,p:21,c:44,f:6,ings:"Pan integral de trigo (70g),  Tomate triturado natural (30g),  Jamón cocido extra (30g)"},
+{id:130,type:"Cena",name:"Cena del Varios",kcal:366,p:34,c:33,f:11,ings:"Sopa de pollo con fideos de sobre (300g),  Pollo cocido (100g),  Huevo de gallina (60g), unidad talla M)"},
+{id:131,type:"Cena",name:"Apio,huevos,gluten",kcal:96,p:1,c:24,f:0,ings:"Mango (160g)"},
+{id:132,type:"Desayuno",name:"Desayuno: Leche entera...",kcal:381,p:19,c:63,f:6,ings:"Leche entera (225g), vaso grande) , Café (infusión) (50g), Plátano, banano (200g), unidad grande) , Jamón cocido extra (45g), lonchas) , Pan tostado de trigo (biscote) (36g)"},
+{id:133,type:"Comida",name:"Arroz con tomate y atún",kcal:348,p:18,c:45,f:10,ings:"Arroz blanco crudo (60g), ml) , Tomate frito comercial (60g), ml) , Atún enlatado en agua (56g), lata pequeña redonda) , Huevo de gallina (60g), unidad talla M)"},
+{id:134,type:"Comida",name:"Huevos,pescado",kcal:78,p:0,c:21,f:0,ings:"Manzana roja (150g)"},
+{id:135,type:"Cena",name:"Tortilla de patatas ycebolla",kcal:340,p:14,c:25,f:20,ings:"Huevo de gallina (120g), unidades talla M) , Aceite de oliva (8g), cucharada de postre) , Patata (100g), unidad pequeña) , Cebolla blanca (50g)"},
+{id:136,type:"Cena",name:"1. Pelar, lavar y trocear la patata en lascas finas. 2. Pela",kcal:78,p:0,c:21,f:0,ings:"Manzana roja (150g)"},
+{id:137,type:"Desayuno",name:"Desayuno: Leche desnatada UHT...",kcal:296,p:13,c:49,f:6,ings:"Leche desnatada UHT (200g), vaso mediano) , Avena (40g),  Plátano, banano (80g), unidad pequeña)"},
+{id:138,type:"Comida",name:"Lentejas con arroz",kcal:312,p:12,c:55,f:5,ings:"Lentejas cocidas (150g), vaso) , Arroz blanco cocido (80g),  Zanahoria (50g), unidad pequeña) , Aceite de oliva (5g)"},
+{id:139,type:"Comida",name:"Gluten",kcal:62,p:0,c:16,f:0,ings:"Manzana roja (120g)"},
+{id:140,type:"Merienda",name:"Merienda Alternativo",kcal:380,p:30,c:60,f:2,ings:"Harina de arroz (70g), Proteína en polvo (30g), Miel (20g), Arándanos (60g)"},
+{id:141,type:"Cena",name:"Merluza al horno conpatatas",kcal:235,p:20,c:25,f:6,ings:"Merluza (150g), filete grande) , Patata (120g), unidad mediana) , Cebolla blanca (50g), unidad pequeña) , Aceite de oliva (5g)"},
+{id:142,type:"Cena",name:"Pescado",kcal:52,p:1,c:12,f:0,ings:"Frambuesa (100g)"},
+{id:143,type:"Desayuno",name:"Desayuno: Pan integral de trigo...",kcal:285,p:12,c:25,f:15,ings:"Pan integral de trigo (50g),  Aguacate/ palta (40g), media unidad) , Pechuga de pavo (fiambre) (30g), lonchas)"},
+{id:144,type:"Tentempié",name:"Tentempié Alternativo",kcal:403,p:18,c:39,f:19,ings:"Pan integral de trigo (70g),  Aguacate/ palta (50g), pieza) , Huevo de gallina (60g), unidad talla M) , Clara de huevo pasteurizada (35g), unidad) , Aceite de oliva (3g)"},
+{id:145,type:"Comida",name:"Pollo al curry con arroz",kcal:410,p:35,c:45,f:10,ings:"Pollo, pechuga, solomillo (150g),  Arroz blanco crudo (60g), ml) , Leche de coco light (50g),  Curry (2g)"},
+{id:146,type:"Comida",name:"1. Cortar el pollo en dados y dorar en una sartén. 2. Añadir",kcal:62,p:0,c:16,f:0,ings:"Manzana roja (120g)"},
+{id:147,type:"Merienda",name:"Merienda Alternativo",kcal:337,p:6,c:55,f:12,ings:"Plátano, banano (125g), unidad pequeña) , Pan tostado de trigo (biscote) (40g),  Aguacate/ palta (75g)"},
+{id:148,type:"Cena",name:"Ensalada de atún y huevo",kcal:290,p:25,c:5,f:18,ings:"Lechuga (100g), bol) , Atún enlatado en agua (60g), lata pequeña redonda) , Huevo de gallina (60g), unidad talla M) , Tomate crudo (100g), tomate pequeño tipo pera) , Aceite de oliva (8g)"},
+{id:149,type:"Cena",name:"Huevos,pescado",kcal:52,p:1,c:12,f:0,ings:"Frambuesa (100g)"},
+{id:150,type:"Desayuno",name:"Desayuno: Leche entera...",kcal:757,p:30,c:107,f:22,ings:"Leche entera (225g), vaso grande) , Café (infusión) (50g), Plátano, banano (160g), unidad mediana) , Leche desnatada calcio UHT (400g), tazón) , Avena (60g)"},
+{id:151,type:"Comida",name:"Guisantes con tomate,atún y cebolla",kcal:606,p:50,c:64,f:17,ings:"Guisantes enlatados (200g), g) , Tomate crudo (150g), tomate pequeño tipo raff) , Cebolla blanca (50g), unidad pequeña) , Atún enlatado en agua (110g), lataspequeñas redondas) , Aceite de oliva (10g), cucharada sopera) , Sal común (0g)"},
+{id:152,type:"Comida",name:"Pescado",kcal:95,p:1,c:23,f:0,ings:"Mandarina (180g)"},
+{id:153,type:"Merienda",name:"Merienda del Varios",kcal:253,p:11,c:31,f:8,ings:"Leche desnatada UHT (225g), vaso grande) , Avena (30g)"},
+{id:154,type:"Cena",name:"Cena del Varios",kcal:317,p:9,c:43,f:12,ings:"Pan integral de trigo (70g), Trucha (450g), ) , Aceite de oliva (10g), cucharada sopera) , Acelgas (150g), plato mediano) , Ajo (10g)"},
+{id:155,type:"Comida",name:"Alubias con tomate ysésamo",kcal:228,p:11,c:32,f:5,ings:"Alubias/ frijoles cocidas (en conserva)/ porotos cocidos (175g), vaso) , Tomatecrudo (100g), tomate pequeño tipo pera) , Semillas de sésamo blancas (15g), cuchara sopera) , Aceitede oliva (5g)"},
+{id:156,type:"Comida",name:"Solomillo de cerdo conzanahoria y lechuga",kcal:765,p:69,c:17,f:45,ings:"Aceite de oliva (10g), cucharada sopera) , Lechuga (100g), bol grande) , Zanahoria (140g), unidad grande) ,Solomillo de cerdo (250g)"},
+{id:157,type:"Comida",name:"1. Asar el solomillo de cerdo cortado en medallones en la pl",kcal:78,p:0,c:21,f:0,ings:"Manzana roja (150g)"},
+{id:158,type:"Cena",name:"Cena del Varios",kcal:682,p:75,c:51,f:19,ings:"Pan integral de trigo (70g), Dorada (370g), ) , Cebolla o cebolleta (100g), cebolleta) ,Tomate crudo (200g), tomate mediano) , Aceite de oliva (10g)"},
+{id:159,type:"Desayuno",name:"Desayuno: Leche entera...",kcal:557,p:27,c:66,f:21,ings:"Leche entera (225g), vaso grande) , Café (infusión) (50g), Zumo de naranja natural (200g), vaso grande) , Clara de huevo pasteurizada (105g), unidades) ,Aceite de oliva (3g), cucharada de café) , Harina de avena (30g), cucharadas soperas rasas) , Miel (10g),  Nuez pelada (15g)"},
+{id:160,type:"Comida",name:"Lentejas con tomate,nueces y queso de cabra",kcal:522,p:24,c:44,f:29,ings:"Lentejas cocidas (175g), vaso) , Nuez pelada (20g), nueces) , Queso de cabra curado (40g), loncha) , Aceite de oliva (8g), cucharada de postre) , Tomate crudo (120g)"},
+{id:161,type:"Comida",name:"Lubina a la plancha conacelgas",kcal:240,p:34,c:4,f:8,ings:"Lubina, róbalo (180g),  Aceite de oliva (5g), cucharada de postre) , Acelgas (75g), platomediano) , Ajo (5g)"},
+{id:162,type:"Comida",name:"Pescado",kcal:50,p:1,c:13,f:0,ings:"Piña natural (100g)"},
+{id:163,type:"Merienda",name:"Merienda Alternativo",kcal:671,p:6,c:34,f:57,ings:"Pan integral de trigo (70g),  Bonito en aceite (55g)"},
+{id:164,type:"Cena",name:"Cena del Varios",kcal:819,p:61,c:49,f:40,ings:"Pan integral de trigo (70g), Aceite de oliva (10g), cucharada sopera) , Rúcula (50g),  Zanahoria (80g), g)) , Lomo de cerdo (200g)"},
+{id:165,type:"Comida",name:"Arroz basmati con huevoduro y pipas de calabaza",kcal:251,p:11,c:23,f:12,ings:"Huevo de gallina (65g), unidad talla M) , Aceite de oliva (5g), cucharada de postre) , Tomate crudo (70g), rodajas) , Arroz basmati crudo (70g), ml) , Semillas de calabaza (10g)"},
+{id:166,type:"Comida",name:"Espirales con tomate yanchoas",kcal:360,p:1,c:5,f:38,ings:"Espirales (90g), ml) , Tomate crudo (120g), tomatepequeño tipo raff) , Anchoas en aceite (28g), unidades) , Aceite de oliva (10g), cucharada sopera) , Albahaca (5g)"},
+{id:167,type:"Comida",name:"Pechuga de pavo a laplancha con rúcula yzanahoria",kcal:279,p:39,c:6,f:11,ings:"Pavo, pechuga (fresco) (175g), filete mediano) , Aceite de oliva (8g), cucharada de postre) , Rúcula (50g), Zanahoria (60g)"},
+{id:168,type:"Comida",name:"1. Asar a la plancha la pechuga de pavo. 2. Rallar la zanaho",kcal:108,p:0,c:28,f:0,ings:"Pera (190g)"},
+{id:169,type:"Cena",name:"Cena del Varios",kcal:466,p:58,c:34,f:8,ings:"Pan integral de trigo (70g), Pechuga de pollo cocinada comercial (170g),  Pisto de verduras comercial (175g)"},
+{id:170,type:"Cena",name:"1. Abrir la lata de pollo, colocarlo en un recipiente adecua",kcal:96,p:1,c:24,f:0,ings:"Mango (160g)"},
+{id:171,type:"Desayuno",name:"Desayuno: Leche entera...",kcal:511,p:25,c:62,f:19,ings:"Leche entera (150g), vaso pequeño) , Café (infusión) (50g), Zumo de naranja natural (200g), vaso grande) , Clara de huevo pasteurizada (105g), unidades) ,Aceite de oliva (3g), cucharada de café) , Harina de avena (30g), cucharadas soperas rasas) , Miel (10g),  Nuez pelada (15g)"},
+{id:172,type:"Desayuno",name:"Desayuno: Leche entera...",kcal:693,p:27,c:84,f:28,ings:"Leche entera (150g), vaso pequeño) , Café (infusión) (50g), Leche desnatada UHT (225g), vaso grande) , Yogur natural (250g), unidades) , Avena (60g), cucharadas soperas) , Chocolate negro (40g)"},
+{id:173,type:"Tentempié",name:"Tentempié Alternativo",kcal:386,p:23,c:52,f:8,ings:"Pan integral de trigo (100g),  Tomate triturado natural (75g),  Jamón serrano (45g)"},
+{id:174,type:"Comida",name:"Macarrones integralescon surimi",kcal:115,p:2,c:14,f:5,ings:"Macarrones integrales crudos (40g), cucharadas soperas) , Surimi (16g), unidades) ,Tomate triturado natural (45g), cucharadas soperas) , Aceite de oliva (5g)"},
+{id:175,type:"Comida",name:"Caballa a la plancha conacelgas",kcal:373,p:30,c:4,f:26,ings:"Caballa (150g), ) , Aceite de oliva (5g), cucharada de postre) , Acelgas (75g), platomediano) , Ajo (5g)"},
+{id:176,type:"Comida",name:"Pescado",kcal:96,p:1,c:24,f:0,ings:"Mango (160g)"},
+{id:177,type:"Merienda",name:"Merienda del Varios",kcal:982,p:23,c:25,f:94,ings:"Yogur natural desnatado (125g), unidad) , Nuez pelada (5g), nuez) , Pistacho sin cáscara (5g), unidades) , Almendra sin cáscara (5g), almendras) , Fresa o fresón (80g)"},
+{id:178,type:"Cena",name:"Lenguado a la planchacon brócoli",kcal:436,p:67,c:10,f:15,ings:"Lenguado (350g), unidades pequeñas) , Brócoli (150g), floretas) , Aceite de oliva (8g)"},
+{id:179,type:"Cena",name:"Pescado",kcal:52,p:1,c:12,f:0,ings:"Frambuesa (100g)"},
+{id:180,type:"Comida",name:"Arroz tres delicias ysalmón a la plancha conbrócoli",kcal:647,p:41,c:43,f:32,ings:"Arroz tres delicias comercial (125g),  Aceite de oliva (5g), cucharada de postre) , Salmón(170g), rodaja/lomo) , Brócoli (125g)"},
+{id:181,type:"Cena",name:"Tortilla de espinacas ysésamo",kcal:241,p:22,c:5,f:14,ings:"Huevo de gallina (60g), unidad talla M) , Espinaca (100g), MG (125g),  Aceite de oliva (8g), cucharada de postre) , Clara de huevo pasteurizada (105g), unidades) , Semillas de sésamo blancas (5g)"},
+{id:182,type:"Cena",name:"Huevos",kcal:78,p:0,c:21,f:0,ings:"Manzana roja (150g)"},
+{id:183,type:"Desayuno",name:"Desayuno: Leche entera...",kcal:253,p:11,c:29,f:9,ings:"Leche entera (150g), vaso pequeño) , Café (infusión) (50g), Pan integral de trigo (40g), ) , Aguacate/ palta (25g), lonchas finas) , Pechuga de pavo (fiambre) (15g)"},
+{id:184,type:"Comida",name:"Pechuga de pavo a laplancha con maíz",kcal:201,p:28,c:5,f:7,ings:"Pavo, pechuga (fresco) (125g), filete pequeño) , Aceite de oliva (5g), cucharada de postre) , Guisantes enlatados (30g), cucharadas soperas) , Maíz dulce enlatado (30g)"},
+{id:185,type:"Comida",name:"1. Asar a la plancha la pechuga de pavo. 2. Escurrir el maíz",kcal:108,p:0,c:28,f:0,ings:"Pera (190g)"},
+{id:186,type:"Cena",name:"Pechuga de pavo a laplancha conchampiñones",kcal:175,p:27,c:0,f:7,ings:"Aceite de oliva (5g), cucharada de postre) , Champiñón (75g), guarnición) , Pavo, pechuga (fresco) (125g)"},
+{id:187,type:"Cena",name:"1. Asar a la plancha la pechuga de pavo. 2. Laminar y saltea",kcal:128,p:1,c:27,f:0,ings:"Plátano, banano (145g)"},
+{id:188,type:"Comida",name:"Arroz con remolacha ypepinillos",kcal:96,p:1,c:11,f:5,ings:"Arroz blanco crudo (40g), cucharadas soperas) , Aceite de oliva (5g), cucharada de postre) ,Remolacha (24g), rodajas) , Pepinillos (30g)"},
+{id:189,type:"Comida",name:"Filete de atún converduras en salsacomercial",kcal:234,p:50,c:0,f:1,ings:"Filete de atún con verduras en salsa comercial (180g)"},
+{id:190,type:"Comida",name:"Pescado",kcal:62,p:0,c:16,f:0,ings:"Manzana roja (120g)"},
+{id:191,type:"Cena",name:"Tortilla con queso cremay pimientos del piquillo",kcal:203,p:14,c:4,f:14,ings:"Queso de untar ligero (15g),  Clara de huevo pasteurizada (35g), unidad) , Huevo de gallina (60g), unidad talla M) , Aceite de oliva (5g), cucharada de postre) , Pimiento del piquillo en tiras al ajillo comercial (60g)"},
+{id:192,type:"Comida",name:"Espirales con tomate yanchoas",kcal:237,p:0,c:3,f:25,ings:"Espirales (70g), ml) , Tomate crudo (90g), tomate pequeño tipo pera) ,Anchoas en aceite (20g), unidades) , Aceite de oliva (5g), cucharada de postre) , Albahaca (5g)"},
+{id:193,type:"Comida",name:"Huevos,pescado,gluten",kcal:78,p:0,c:21,f:0,ings:"Manzana roja (150g)"},
+{id:194,type:"Cena",name:"Pechuga de pollo conpisto de verdurascomercial",kcal:280,p:52,c:0,f:6,ings:"Pechuga de pollo cocinada comercial (170g),  Pisto de verduras comercial (175g)"},
+{id:195,type:"Cena",name:"1. Abrir la lata de pollo, colocarlo en un recipiente adecua",kcal:65,p:1,c:16,f:0,ings:"Piña, enlatada en su jugo (130g)"},
+{id:196,type:"Tentempié",name:"Tortitas de arrozcomerciales conguacamole y jamóncocido",kcal:99,p:9,c:5,f:3,ings:"Tortitas de arroz (21g), unidades) , Guacamole (40g),  Jamón cocido (30g)"},
+{id:197,type:"Comida",name:"Alubias con tomate ysésamo",kcal:142,p:6,c:16,f:5,ings:"Alubias/ frijoles cocidas (en conserva)/ porotos cocidos (100g), vaso) , Tomate crudo (45g), rodajas) , Semillas de sésamo blancas (10g),  Aceite de oliva (5g)"},
+{id:198,type:"Comida",name:"Lubina a la plancha conaguacate, mozzarella ypiñones",kcal:303,p:28,c:5,f:18,ings:"Aceite de oliva (5g), cucharada de postre) , Mozzarella Fresca Light (50g), de bola) , Filete delubina (150g), filete) , Aguacate/ palta (50g), pieza) , Piñones sin cáscara (5g)"},
+{id:199,type:"Merienda",name:"Yogur griego conalmendras ymandarinas",kcal:827,p:32,c:34,f:68,ings:"Yogur griego (125g), unidad) , Almendra sin cáscara (10g), almendras) , Mandarina (120g)"},
+{id:200,type:"Cena",name:"Lomo de cerdo a laplancha con lechuga ytomate",kcal:300,p:27,c:3,f:19,ings:"Aceite de oliva (5g), cucharada de postre) , Lechuga (40g), hojas grande) , Tomate crudo (45g), rodajas) ,Lomo de cerdo (100g)"},
+{id:201,type:"Cena",name:"1. Asar las cortadas de lomo de cerdo en la plancha caliente",kcal:111,p:1,c:28,f:0,ings:"Plátano, banano (125g)"},
+{id:202,type:"Comida",name:"Arroz tres deliciascomercial",kcal:669,p:10,c:126,f:13,ings:"Arroz tres delicias comercial (300g),  Aceite de oliva (8g), Espárrago blanco (50g), espárragos medianos) , Lechuga (30g), hojas grande) , Tomate crudo (90g), tomate pequeño tipo pera) , Trucha (250g), ) , Aceite de oliva (5g)"},
+{id:203,type:"Cena",name:"Salmón a la plancha concanónigos y maíz",kcal:325,p:25,c:6,f:20,ings:"Salmón (120g),  Canónigos (30g),  Maíz dulce enlatado (30g), cucharas soperas) , Aceite de oliva (5g)"},
+{id:204,type:"Desayuno",name:"Desayuno: Yogur natural desnatado...",kcal:924,p:25,c:56,f:68,ings:"Yogur natural desnatado (125g), unidad) , Nuez pelada (10g), Pan integral de trigo (70g),  Aguacate/ palta (50g), pieza) , Pechuga de pavo (fiambre) (30g), lonchas) , Leche desnatada UHT (225g), vaso grande) , Café (infusión) (50g)"},
+{id:205,type:"Comida",name:"Ensalada de garbanzos,tomate, cebolla ypimiento verde",kcal:341,p:15,c:52,f:9,ings:"Tomate crudo (75g), rodajas) , Cebolla blanca (60g), unidad pequeña) , Pimiento verde (75g), unidad pequeña) , Garbanzos cocidos (175g), vaso) , Aceite de oliva (5g)"},
+{id:206,type:"Comida",name:"Sepia a la plancha conbrócoli",kcal:218,p:36,c:5,f:6,ings:"Aceite de oliva (5g), cucharada de postre) , Brócoli (200g), Sepia (200g)"},
+{id:207,type:"Comida",name:"Crustáceos, moluscos",kcal:96,p:1,c:24,f:0,ings:"Mango (160g)"},
+{id:208,type:"Merienda",name:"Merienda Alternativo",kcal:307,p:21,c:44,f:6,ings:"Pan integral de trigo (70g),  Tomate triturado natural (30g),  Jamón cocido extra (30g)"},
+{id:209,type:"Cena",name:"Cena del Varios",kcal:366,p:34,c:33,f:11,ings:"Sopa de pollo con fideos de sobre (300g),  Pollo cocido (100g),  Huevo de gallina (60g), unidad talla M)"},
+{id:210,type:"Cena",name:"Apio,huevos,gluten",kcal:96,p:1,c:24,f:0,ings:"Mango (160g)"},
+{id:211,type:"Desayuno",name:"Desayuno: Leche entera...",kcal:381,p:19,c:63,f:6,ings:"Leche entera (225g), vaso grande) , Café (infusión) (50g), Plátano, banano (200g), unidad grande) , Jamón cocido extra (45g), lonchas) , Pan tostado de trigo (biscote) (36g)"},
+{id:212,type:"Comida",name:"Arroz con tomate y atún",kcal:348,p:18,c:45,f:10,ings:"Arroz blanco crudo (60g), ml) , Tomate frito comercial (60g), ml) , Atún enlatado en agua (56g), lata pequeña redonda) , Huevo de gallina (60g), unidad talla M)"},
+{id:213,type:"Comida",name:"Huevos,pescado",kcal:78,p:0,c:21,f:0,ings:"Manzana roja (150g)"},
+{id:214,type:"Cena",name:"Tortilla de patatas ycebolla",kcal:340,p:14,c:25,f:20,ings:"Huevo de gallina (120g), unidades talla M) , Aceite de oliva (8g), cucharada de postre) , Patata (100g), unidad pequeña) , Cebolla blanca (50g)"},
+{id:215,type:"Cena",name:"1. Pelar, lavar y trocear la patata en lascas finas. 2. Pela",kcal:78,p:0,c:21,f:0,ings:"Manzana roja (150g)"},
+{id:216,type:"Desayuno",name:"Desayuno: Leche desnatada UHT...",kcal:296,p:13,c:49,f:6,ings:"Leche desnatada UHT (200g), vaso mediano) , Avena (40g),  Plátano, banano (80g), unidad pequeña)"},
+{id:217,type:"Comida",name:"Lentejas con arroz",kcal:312,p:12,c:55,f:5,ings:"Lentejas cocidas (150g), vaso) , Arroz blanco cocido (80g),  Zanahoria (50g), unidad pequeña) , Aceite de oliva (5g)"},
+{id:218,type:"Comida",name:"Gluten",kcal:62,p:0,c:16,f:0,ings:"Manzana roja (120g)"},
+{id:219,type:"Merienda",name:"Merienda Alternativo",kcal:380,p:30,c:60,f:2,ings:"Harina de arroz (70g), Proteína en polvo (30g), Miel (20g), Arándanos (60g)"},
+{id:220,type:"Cena",name:"Merluza al horno conpatatas",kcal:235,p:20,c:25,f:6,ings:"Merluza (150g), filete grande) , Patata (120g), unidad mediana) , Cebolla blanca (50g), unidad pequeña) , Aceite de oliva (5g)"},
+{id:221,type:"Cena",name:"Pescado",kcal:52,p:1,c:12,f:0,ings:"Frambuesa (100g)"},
+{id:222,type:"Desayuno",name:"Desayuno: Pan integral de trigo...",kcal:285,p:12,c:25,f:15,ings:"Pan integral de trigo (50g),  Aguacate/ palta (40g), media unidad) , Pechuga de pavo (fiambre) (30g), lonchas)"},
+{id:223,type:"Tentempié",name:"Tentempié Alternativo",kcal:403,p:18,c:39,f:19,ings:"Pan integral de trigo (70g),  Aguacate/ palta (50g), pieza) , Huevo de gallina (60g), unidad talla M) , Clara de huevo pasteurizada (35g), unidad) , Aceite de oliva (3g)"},
+{id:224,type:"Comida",name:"Pollo al curry con arroz",kcal:410,p:35,c:45,f:10,ings:"Pollo, pechuga, solomillo (150g),  Arroz blanco crudo (60g), ml) , Leche de coco light (50g),  Curry (2g)"},
+{id:225,type:"Comida",name:"1. Cortar el pollo en dados y dorar en una sartén. 2. Añadir",kcal:62,p:0,c:16,f:0,ings:"Manzana roja (120g)"},
+{id:226,type:"Merienda",name:"Merienda Alternativo",kcal:337,p:6,c:55,f:12,ings:"Plátano, banano (125g), unidad pequeña) , Pan tostado de trigo (biscote) (40g),  Aguacate/ palta (75g)"},
+{id:227,type:"Cena",name:"Ensalada de atún y huevo",kcal:290,p:25,c:5,f:18,ings:"Lechuga (100g), bol) , Atún enlatado en agua (60g), lata pequeña redonda) , Huevo de gallina (60g), unidad talla M) , Tomate crudo (100g), tomate pequeño tipo pera) , Aceite de oliva (8g)"},
+{id:228,type:"Cena",name:"Huevos,pescado",kcal:52,p:1,c:12,f:0,ings:"Frambuesa (100g)"},
+{id:229,type:"Desayuno",name:"150 G De Queso Ricotta",kcal:380,p:25,c:30,f:18,ings:"Queso ricotta (150g), Mango (100g), Proteína en polvo (15g), Pistacho (30g)"},
+{id:230,type:"Comida",name:"Ensalada",kcal:420,p:30,c:55,f:10,ings:"Pasta maíz (40g), Langostinos (50g), Huevos (3), Verduras"},
+{id:231,type:"Comida",name:"Plancha",kcal:276,p:43,c:9,f:6,ings:"Filete de atún (120g), Patata (200g), Manzana (1)"},
+{id:232,type:"Comida",name:"Pollo Con Almendras",kcal:550,p:45,c:20,f:30,ings:"Pollo (200g), Almendras (50g), Zanahoria (100g), Pan (40g)"},
+{id:233,type:"Merienda",name:"Media Tarde Del Varios",kcal:294,p:24,c:33,f:6,ings:"Pan wasa (40g), Atún (56g), Guisantes (145g), Limón, Tahini"},
+{id:234,type:"Cena",name:"Sepia Plancha Con Arroz",kcal:420,p:35,c:45,f:8,ings:"Sepia (200g), Arroz (60g), Verduras"},
+{id:235,type:"Cena",name:"Atún Horno Y Boniato",kcal:350,p:30,c:35,f:10,ings:"Atún fresco (150g), Boniato (150g), Aceite (5g)"},
+{id:236,type:"Desayuno",name:"2 Rebanadas De Pan Blanco",kcal:450,p:35,c:5,f:30,ings:"Pan blanco (2 rebanadas), Huevos (4), Jamón cocido (40g), Queso fundir (30g)"},
+{id:237,type:"Tentempié",name:"M.Mañana Del Varios",kcal:380,p:30,c:60,f:2,ings:"Harina de arroz (70g), Proteína en polvo (30g), Miel (20g), Arándanos"},
+{id:238,type:"Comida",name:"Puré De Verduras",kcal:350,p:25,c:30,f:15,ings:"Puré verduras, Pan (80g), Boquerones en vinagre (60g), Queso fresco (200g)"},
+{id:239,type:"Comida",name:"300 G De Patata Asada",kcal:600,p:40,c:60,f:20,ings:"Patata asada (300g), Ternera (180g), Aguacate (1)"},
+{id:240,type:"Comida",name:"250 G De Zanahoria, Pimiento Y Champiñones Salteados",kcal:350,p:35,c:30,f:10,ings:"Zanahoria (250g), Pimiento, Champiñones, Atún (200g), Arroz (70g)"},
+{id:241,type:"Desayuno",name:"Tortilla de 4 huevos y jamón",kcal:450,p:35,c:5,f:30,ings:"Huevos (4), Jamón cocido (40g), Queso fundir (30g), Pan blanco (2 rebanadas)"},
+{id:242,type:"Desayuno",name:"Queso Ricotta con Mango y Pistacho",kcal:380,p:25,c:30,f:18,ings:"Queso Ricotta (150g), Mango (100g), Proteína en polvo (15g), Pistachos (30g)"},
+{id:243,type:"Desayuno",name:"Pan Blanco con Jamón y Queso",kcal:320,p:15,c:40,f:10,ings:"Pan blanco (2 rebanadas), Jamón cocido (40g), Queso (30g)"},
+{id:244,type:"Tentempié",name:"Papilla de Arroz con Proteína y Miel",kcal:380,p:30,c:60,f:2,ings:"Harina de arroz (70g), Proteína en polvo (30g), Miel (20g), Arándanos (60g)"},
+{id:245,type:"Merienda",name:"Puré de Verduras y Boquerones",kcal:350,p:25,c:30,f:15,ings:"Puré verduras, Pan (80g), Boquerones en vinagre (60g), Queso fresco (200g)"},
+{id:246,type:"Comida",name:"Pollo con Almendras y Zanahoria",kcal:550,p:45,c:20,f:30,ings:"Pollo (200g), Almendras (50g), Zanahoria (100g), Pan (40g)"},
+{id:247,type:"Comida",name:"Ensalada Pasta Maíz y Langostinos",kcal:420,p:30,c:55,f:10,ings:"Pasta maíz (40g), Langostinos (50g), Huevos (3), Verduras"},
+{id:248,type:"Comida",name:"Patata Asada y Ternera",kcal:600,p:40,c:60,f:20,ings:"Patata asada (300g), Ternera (180g), Aguacate (1ud)"},
+{id:249,type:"Comida",name:"Salteado Zanahoria y Atún",kcal:350,p:35,c:30,f:10,ings:"Zanahoria (250g), Pimiento, Champiñones, Atún (200g), Arroz (70g)"},
+{id:250,type:"Cena",name:"Sepia plancha con Arroz",kcal:420,p:35,c:45,f:8,ings:"Sepia (200g), Arroz (60g), Verduras"},
+{id:251,type:"Cena",name:"Atún horno y Boniato",kcal:350,p:30,c:35,f:10,ings:"Atún fresco (150g), Boniato (150g), Aceite (5g)"}
+];
 
-        // --- ESTADO ---
-        let activeDay = "Lunes";
-        let activeCat = "Desayuno";
-        let targets = {};
-        let weeklyPlan = { "Lunes":[], "Martes":[], "Miércoles":[], "Jueves":[], "Viernes":[], "Sábado":[], "Domingo":[] };
-        const days = ["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"];
+// --- VARIABLES GLOBALES ---
+let activeDay = "Lunes";
+let activeCat = "Desayuno";
+let plan = { "Lunes":[], "Martes":[], "Miércoles":[], "Jueves":[], "Viernes":[], "Sábado":[], "Domingo":[] };
+let targets = {};
+const days = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
 
-        // --- INICIO ---
-        window.onload = function() {
-            const t = localStorage.getItem('maldofit_targets');
-            const p = localStorage.getItem('maldofit_plan');
-            
-            if(t) targets = JSON.parse(t);
-            else calculateMacros(); // Default Calc
+// --- LÓGICA CALCULADORA ---
+function openModal() { document.getElementById('modal').style.display='flex'; }
+function closeModal() { document.getElementById('modal').style.display='none'; renderTargets(); }
 
-            if(p) weeklyPlan = JSON.parse(p);
+function calculateBase() {
+    const w = parseFloat(document.getElementById('weight').value);
+    const h = parseFloat(document.getElementById('height').value);
+    const a = parseFloat(document.getElementById('age').value);
+    const g = document.getElementById('gender').value;
+    const act = parseFloat(document.getElementById('activity').value);
+    const goal = parseFloat(document.getElementById('goal').value);
 
-            renderLib();
-            renderPlan();
+    // Harris-Benedict
+    let bmr = (g==='m') ? 88.362+(13.397*w)+(4.799*h)-(5.677*a) : 447.593+(9.247*w)+(3.098*h)-(4.330*a);
+    const tdee = bmr * act;
+    const kcal = Math.round(tdee * (1 + goal));
+    
+    // Macros (CrossFit base: 2g P, 1g F)
+    const p = Math.round(w * 2.0);
+    const f = Math.round(w * 1.0);
+    const c = Math.round((kcal - (p*4 + f*9)) / 4);
+
+    // Generar tabla
+    const tbody = document.getElementById('cycle-body');
+    tbody.innerHTML = '';
+    days.forEach(d => {
+        tbody.innerHTML += `<tr>
+            <td>${d}</td>
+            <td><input id="k-${d}" type="number" value="${kcal}" style="width:60px"></td>
+            <td><input id="p-${d}" type="number" value="${p}" style="width:50px"></td>
+            <td><input id="c-${d}" type="number" value="${c}" style="width:50px"></td>
+            <td><input id="f-${d}" type="number" value="${f}" style="width:50px"></td>
+        </tr>`;
+    });
+}
+
+function saveConfig() {
+    // Si la tabla está vacía, calcular primero
+    if(document.getElementById('cycle-body').children.length === 0) calculateBase();
+    
+    days.forEach(d => {
+        targets[d] = {
+            k: parseInt(document.getElementById(`k-${d}`).value),
+            p: parseInt(document.getElementById(`p-${d}`).value),
+            c: parseInt(document.getElementById(`c-${d}`).value),
+            f: parseInt(document.getElementById(`f-${d}`).value)
         };
+    });
+    closeModal();
+}
 
-        // --- CALCULADORA ---
-        function calculateMacros() {
-            const w = parseFloat(document.getElementById('w').value);
-            const h = parseFloat(document.getElementById('h').value);
-            const a = parseFloat(document.getElementById('a').value);
-            const s = document.getElementById('s').value;
-            const act = parseFloat(document.getElementById('act').value);
-            const goal = parseFloat(document.getElementById('goal').value);
+// --- LÓGICA APP ---
+function setDay(d, el) {
+    activeDay = d;
+    document.querySelectorAll('.day-tab').forEach(x => x.classList.remove('active'));
+    el.classList.add('active');
+    renderPlan();
+    renderTargets();
+}
 
-            // Harris-Benedict Revisada
-            let bmr;
-            if(s === 'm') bmr = 88.362 + (13.397 * w) + (4.799 * h) - (5.677 * a);
-            else bmr = 447.593 + (9.247 * w) + (3.098 * h) - (4.330 * a);
+function setCat(c, el) {
+    activeCat = c;
+    document.querySelectorAll('.cat-btn').forEach(x => x.classList.remove('active'));
+    el.classList.add('active');
+    renderLib();
+}
 
-            const tdee = Math.round(bmr * act);
-            const targetKcal = Math.round(tdee * (1 + goal));
+function renderLib() {
+    const list = document.getElementById('lib-list');
+    const search = document.getElementById('search').value.toLowerCase();
+    list.innerHTML = '';
+    
+    // Filtro avanzado para categorías (ej: "Media Mañana" = "Tentempié")
+    const filtered = foodDB.filter(x => {
+        let matchCat = x.type === activeCat;
+        if(activeCat === 'Tentempié' && (x.type === 'Media Mañana' || x.type === 'M.MAÑANA')) matchCat = true;
+        if(!matchCat) return false;
+        
+        return x.name.toLowerCase().includes(search) || x.ings.toLowerCase().includes(search);
+    });
+    
+    filtered.forEach(x => {
+        const div = document.createElement('div');
+        div.className = 'meal-card';
+        div.innerHTML = `
+            <div style="flex:1; margin-right:10px;">
+                <div style="font-weight:bold; margin-bottom:5px;">${x.name}</div>
+                <div style="margin-bottom:5px;">
+                    <span class="tag">🔥 ${x.kcal}</span>
+                    <span class="tag">P:${x.p}</span>
+                    <span class="tag">C:${x.c}</span>
+                    <span class="tag">G:${x.f}</span>
+                </div>
+                <div style="font-size:0.85em; color:#666;">${x.ings}</div>
+            </div>
+            <button class="btn-add" onclick="add(${x.id})">+</button>
+        `;
+        list.appendChild(div);
+    });
+}
 
-            // Macros Personalizados (CrossFit)
-            const p = Math.round(w * 2.0); // 2g/kg Prot
-            const f = Math.round(w * 0.9); // 0.9g/kg Grasa
-            const c = Math.round((targetKcal - (p * 4) - (f * 9)) / 4); // Resto Carb
+function renderPlan() {
+    const list = document.getElementById('plan-list');
+    list.innerHTML = "";
+    let t = {k:0,p:0,c:0,f:0};
+    
+    plan[activeDay].forEach((x, i) => {
+        t.k+=x.kcal; t.p+=x.p; t.c+=x.c; t.f+=x.f;
+        const div = document.createElement('div');
+        div.style.cssText = "background:white; padding:10px; border:1px solid #ddd; margin-bottom:10px; border-radius:6px; display:flex; justify-content:space-between; align-items:center";
+        div.innerHTML = `
+            <div>
+                <div style="font-weight:bold; color:#0056b3; font-size:0.9em">${x.type}</div>
+                <div>${x.name}</div>
+                <div style="font-size:0.8em; color:#666">🔥${x.kcal} P:${x.p} C:${x.c} F:${x.f}</div>
+            </div>
+            <span style="color:red; cursor:pointer; font-weight:bold" onclick="rem(${i})">×</span>
+        `;
+        list.appendChild(div);
+    });
+    
+    updateStats(t);
+}
 
-            days.forEach(d => {
-                targets[d] = { k: targetKcal, p: p, c: c, f: f };
-            });
+function updateStats(cur) {
+    const tgt = targets[activeDay] || {k:2500,p:160,c:300,f:70};
+    document.getElementById('vk').innerText = cur.k + '/' + tgt.k;
+    document.getElementById('vp').innerText = cur.p + '/' + tgt.p;
+    document.getElementById('vc').innerText = cur.c + '/' + tgt.c;
+    document.getElementById('vf').innerText = cur.f + '/' + tgt.f;
+    
+    document.getElementById('bk').style.width = Math.min((cur.k/tgt.k)*100,100)+'%';
+    document.getElementById('bp').style.width = Math.min((cur.p/tgt.p)*100,100)+'%';
+    document.getElementById('bc').style.width = Math.min((cur.c/tgt.c)*100,100)+'%';
+    document.getElementById('bf').style.width = Math.min((cur.f/tgt.f)*100,100)+'%';
+}
 
-            // Actualizar tabla visual
-            const tbody = document.getElementById('cycle-body');
-            tbody.innerHTML = '';
-            days.forEach(d => {
-                tbody.innerHTML += `<tr><td>${d}</td><td>${targetKcal}</td><td>${p}</td><td>${c}</td><td>${f}</td></tr>`;
-            });
+function add(id) { plan[activeDay].push(foodDB.find(x=>x.id===id)); renderPlan(); }
+function rem(i) { plan[activeDay].splice(i,1); renderPlan(); }
 
-            localStorage.setItem('maldofit_targets', JSON.stringify(targets));
-            renderPlan();
-        }
-
-        // --- UI ---
-        function setDay(d, el) {
-            activeDay = d;
-            document.querySelectorAll('.day-pill').forEach(e => e.classList.remove('active'));
-            el.classList.add('active');
-            renderPlan();
-        }
-
-        function filterCat(c, el) {
-            activeCat = c;
-            document.querySelectorAll('.cat-chip').forEach(e => e.classList.remove('active'));
-            el.classList.add('active');
-            renderLib();
-        }
-
-        function switchView(vid, el) {
-            document.querySelectorAll('.view').forEach(e => e.classList.remove('active'));
-            document.getElementById(vid).classList.add('active');
-            document.querySelectorAll('.nav-btn').forEach(e => e.classList.remove('active'));
-            el.classList.add('active');
-        }
-
-        function renderLib() {
-            const list = document.getElementById('lib-list');
-            const term = document.getElementById('search').value.toLowerCase();
-            list.innerHTML = '';
-
-            const filtered = foodDB.filter(x => {
-                let matchCat = x.type === activeCat;
-                if (activeCat === 'Tentempié' && (x.type === 'M.MAÑANA' || x.type === 'Media Mañana')) matchCat = true;
-                return matchCat && (x.name.toLowerCase().includes(term) || x.ings.toLowerCase().includes(term));
-            });
-
-            filtered.forEach(x => {
-                const div = document.createElement('div');
-                div.className = 'meal-item';
-                div.innerHTML = `
-                    <div class="meal-type">${x.type}</div>
-                    <div class="meal-name">${x.name}</div>
-                    <div class="meal-info">🔥 ${x.kcal} · P:${x.p} · C:${x.c} · G:${x.f}</div>
-                    <div class="ing-text">${x.ings}</div>
-                    <button class="add-btn" onclick="addFood(${x.id})">+</button>
-                `;
-                list.appendChild(div);
-            });
-        }
-
-        function addFood(id) {
-            const item = foodDB.find(x => x.id === id);
-            weeklyPlan[activeDay].push(item);
-            savePlan();
-            renderPlan();
-        }
-
-        function removeFood(idx) {
-            weeklyPlan[activeDay].splice(idx, 1);
-            savePlan();
-            renderPlan();
-        }
-
-        function savePlan() {
-            localStorage.setItem('maldofit_plan', JSON.stringify(weeklyPlan));
-        }
-
-        function renderPlan() {
-            const list = document.getElementById('planner-list');
-            list.innerHTML = '';
-            
-            let tots = {k:0, p:0, c:0, f:0};
-            
-            weeklyPlan[activeDay].forEach((x, i) => {
-                tots.k += x.kcal; tots.p += x.p; tots.c += x.c; tots.f += x.f;
-                const div = document.createElement('div');
-                div.className = 'meal-item';
-                div.innerHTML = `
-                    <div class="meal-type">${x.type}</div>
-                    <div class="meal-name">${x.name}</div>
-                    <div class="meal-info">🔥 ${x.kcal} · P:${x.p} · C:${x.c} · G:${x.f}</div>
-                    <button class="btn-del" onclick="removeFood(${i})">&times;</button>
-                `;
-                list.appendChild(div);
-            });
-
-            // Update Stats
-            const tgt = targets[activeDay] || {k:2500, p:160, c:300, f:70};
-            
-            document.getElementById('val-k').innerText = `${tots.k} / ${tgt.k}`;
-            document.getElementById('bar-k').style.width = Math.min((tots.k/tgt.k)*100, 100) + '%';
-            
-            document.getElementById('val-p').innerText = `${tots.p} / ${tgt.p}g`;
-            document.getElementById('bar-p').style.width = Math.min((tots.p/tgt.p)*100, 100) + '%';
-            
-            document.getElementById('val-c').innerText = `${tots.c} / ${tgt.c}g`;
-            document.getElementById('bar-c').style.width = Math.min((tots.c/tgt.c)*100, 100) + '%';
-            
-            document.getElementById('val-f').innerText = `${tots.f} / ${tgt.f}g`;
-            document.getElementById('bar-f').style.width = Math.min((tots.f/tgt.f)*100, 100) + '%';
-        }
-    </script>
+// Init
+calcBase();
+renderLib();
+</script>
 </body>
 </html>
