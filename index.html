@@ -1,506 +1,327 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>MaldoFit NEON vFinal</title>
-    <style>
-        :root {
-            --bg-body: #050505;
-            --bg-card: #141414;
-            --primary: #00f2ff;
-            --accent: #bc13fe;
-            --success: #0aff60;
-            --danger: #ff2a6d;
-            --warning: #ffd500;
-            --text-main: #ffffff;
-            --text-sec: #999999;
-            --border: #2a2a2a;
-        }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: -apple-system, system-ui, sans-serif; }
-        
-        body { background: var(--bg-body); color: var(--text-main); margin: 0; padding: 0; padding-bottom: 90px; padding-top: env(safe-area-inset-top); height: 100vh; overflow-y: scroll; }
-
-        /* UI COMPONENTS */
-        .header { padding: 15px 20px; background: rgba(5,5,5,0.95); position: sticky; top: 0; z-index: 50; backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-        h1 { margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.5px; background: linear-gradient(90deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        
-        .btn-obj { background: transparent; border: 1px solid var(--primary); color: var(--primary); padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; letter-spacing: 1px; }
-
-        .tabs-scroller { display: flex; overflow-x: auto; padding: 15px 20px; gap: 10px; scrollbar-width: none; }
-        .tab-pill { background: var(--bg-card); border: 1px solid var(--border); padding: 8px 16px; border-radius: 20px; color: var(--text-sec); font-size: 13px; font-weight: 600; white-space: nowrap; transition: 0.2s; }
-        .tab-pill.active { background: var(--primary); color: #000; border-color: var(--primary); box-shadow: 0 0 15px rgba(0,242,255,0.2); }
-
-        .dashboard { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding: 0 20px; margin-bottom: 20px; }
-        .dash-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 10px 5px; text-align: center; }
-        .dash-val { font-size: 14px; font-weight: 800; display: block; }
-        .dash-lbl { font-size: 10px; color: var(--text-sec); text-transform: uppercase; margin-top: 3px; }
-        .bar-bg { height: 4px; background: #333; margin: 8px 5px 0 5px; border-radius: 2px; overflow: hidden; }
-        .bar-fill { height: 100%; width: 0%; transition: width 0.5s ease-out; }
-
-        .meal-list { padding: 0 20px; }
-        .meal-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 15px; margin-bottom: 12px; position: relative; }
-        .meal-cat { font-size: 10px; font-weight: 800; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
-        .meal-title { font-size: 15px; font-weight: 600; margin-bottom: 6px; padding-right: 30px; line-height: 1.3; }
-        .meal-macros { font-size: 12px; color: var(--text-sec); font-family: monospace; margin-bottom: 8px; }
-        .meal-ings { font-size: 12px; color: #777; line-height: 1.4; border-top: 1px solid #222; padding-top: 8px; }
-        .btn-action { position: absolute; top: 15px; right: 15px; width: 30px; height: 30px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; }
-        .btn-add { background: var(--success); color: #000; box-shadow: 0 0 10px rgba(10,255,96,0.3); }
-        .btn-del { background: transparent; color: var(--danger); font-size: 22px; top: 10px; right: 10px; }
-
-        /* SEARCH & LIBRARY */
-        .search-bar { width: 100%; background: var(--bg-card); border: 1px solid var(--border); padding: 14px; border-radius: 12px; color: white; font-size: 16px; outline: none; margin-bottom: 10px; }
-        .cat-filter { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 15px; scrollbar-width: none; }
-        .filter-chip { padding: 6px 14px; background: #222; border-radius: 15px; font-size: 12px; color: #888; border: 1px solid transparent; white-space: nowrap; }
-        .filter-chip.active { background: var(--accent); color: white; }
-
-        /* MODAL */
-        #modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:2000; backdrop-filter: blur(5px); align-items:center; justify-content:center; }
-        .modal-body { background: #1a1a1a; width: 90%; max-width: 400px; padding: 25px; border-radius: 20px; border: 1px solid var(--border); max-height: 90vh; overflow-y: auto; }
-        .input-group { margin-bottom: 15px; }
-        .input-label { display: block; color: var(--text-sec); font-size: 11px; margin-bottom: 5px; text-transform: uppercase; font-weight: 700; }
-        .input-field { width: 100%; background: #000; border: 1px solid var(--border); color: white; padding: 12px; border-radius: 8px; font-size: 16px; }
-        .btn-full { width: 100%; background: var(--primary); color: #000; padding: 14px; border-radius: 10px; border: none; font-weight: 800; font-size: 14px; text-transform: uppercase; margin-top: 10px; }
-
-        /* NAVBAR */
-        .navbar { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(10,10,10,0.95); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 10px 0 25px 0; z-index: 100; backdrop-filter: blur(10px); }
-        .nav-btn { background: none; border: none; color: #555; display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 10px; font-weight: 600; }
-        .nav-btn.active { color: var(--primary); }
-        .nav-icon { font-size: 20px; margin-bottom: 2px; }
-
-        /* UTILS */
-        .view { display: none; }
-        .view.active { display: block; }
-        
-        @media print {
-            .navbar, .header, .day-scroll, .add-btn, .btn-del { display: none !important; }
-            .view { display: block !important; }
-            body { background: white; color: black; }
-            .meal-card { border: 1px solid #ccc; background: white; color: black; break-inside: avoid; }
-            .meal-name { color: black; }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>MaldoFit PRO vFinal</title>
+<style>
+:root {
+ --bg:#050505; --card:#141414; --text:#fff; --sub:#888; --border:#333;
+ --neon-blue:#00f3ff; --neon-pink:#bc13fe; --neon-green:#0aff60; --neon-red:#ff2a6d; --neon-yellow:#ffd500;
+}
+body { background:var(--bg); color:var(--text); font-family:-apple-system, system-ui, sans-serif; margin:0; padding:0; padding-bottom:90px; height:100vh; overflow-y:scroll; -webkit-tap-highlight-color:transparent; }
+/* HEADER */
+.header { position:sticky; top:0; background:rgba(5,5,5,0.95); backdrop-filter:blur(10px); padding:15px 20px; border-bottom:1px solid var(--border); z-index:100; display:flex; justify-content:space-between; align-items:center; }
+h1 { margin:0; font-size:22px; font-weight:900; letter-spacing:-0.5px; background:linear-gradient(90deg, var(--neon-blue), var(--neon-pink)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.btn-obj { background:none; border:1px solid var(--neon-blue); color:var(--neon-blue); padding:5px 12px; border-radius:20px; font-size:11px; font-weight:700; cursor:pointer; }
+/* TABS */
+.day-scroll { display:flex; overflow-x:auto; padding:15px 20px; gap:8px; scrollbar-width:none; }
+.day-pill { background:var(--card); border:1px solid var(--border); padding:8px 16px; border-radius:20px; color:var(--sub); font-size:13px; font-weight:600; white-space:nowrap; transition:0.2s; cursor:pointer; }
+.day-pill.active { background:var(--neon-blue); color:#000; border-color:var(--neon-blue); box-shadow:0 0 10px rgba(0,243,255,0.3); }
+/* STATS */
+.stats { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; padding:0 20px 20px; }
+.stat-box { background:var(--card); border:1px solid var(--border); padding:10px 5px; border-radius:10px; text-align:center; }
+.s-val { font-size:13px; font-weight:800; display:block; }
+.s-lbl { font-size:10px; color:var(--sub); text-transform:uppercase; }
+.bar-bg { height:3px; background:#333; margin:5px 5px 0; border-radius:2px; overflow:hidden; }
+.bar-fill { height:100%; width:0%; transition:width 0.3s; }
+/* LISTS */
+.list { padding:0 20px; }
+.item { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:15px; margin-bottom:10px; position:relative; animation:fadeIn 0.3s; }
+.i-cat { font-size:10px; font-weight:800; color:var(--neon-pink); text-transform:uppercase; margin-bottom:4px; }
+.i-name { font-size:15px; font-weight:600; margin-bottom:5px; line-height:1.3; padding-right:30px; }
+.i-macro { font-size:11px; color:var(--sub); font-family:monospace; }
+.i-ing { font-size:12px; color:#aaa; margin-top:8px; border-top:1px solid #222; padding-top:8px; font-style:italic; }
+.btn-act { position:absolute; top:12px; right:12px; width:28px; height:28px; border-radius:50%; border:none; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:16px; }
+.add { background:var(--neon-green); color:#000; }
+.del { background:transparent; color:var(--neon-red); font-size:20px; top:10px; }
+/* FILTER */
+.search-area { padding:0 20px; position:sticky; top:65px; background:var(--bg); z-index:90; padding-bottom:10px; }
+.search-inp { width:100%; background:var(--card); border:1px solid var(--border); color:#fff; padding:12px; border-radius:10px; font-size:15px; outline:none; }
+.cats { display:flex; gap:8px; overflow-x:auto; margin-top:10px; scrollbar-width:none; padding-bottom:5px; }
+.cat-tag { padding:6px 14px; background:#222; border-radius:15px; font-size:12px; color:#aaa; white-space:nowrap; cursor:pointer; border:1px solid transparent; }
+.cat-tag.active { background:var(--neon-pink); color:#fff; }
+/* MODAL */
+#modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:2000; align-items:center; justify-content:center; backdrop-filter:blur(5px); }
+.modal-c { background:var(--card); width:90%; max-width:400px; padding:25px; border-radius:20px; border:1px solid var(--border); max-height:85vh; overflow-y:auto; }
+.inp-grp { margin-bottom:15px; }
+.inp-lbl { display:block; color:var(--sub); font-size:11px; margin-bottom:5px; text-transform:uppercase; font-weight:700; }
+.inp { width:100%; background:#000; border:1px solid var(--border); color:#fff; padding:10px; border-radius:8px; font-size:15px; }
+.btn-save { width:100%; background:var(--neon-blue); color:#000; padding:12px; border-radius:8px; border:none; font-weight:800; text-transform:uppercase; margin-top:10px; cursor:pointer; }
+.btn-close { width:100%; background:none; border:none; color:var(--sub); padding:10px; margin-top:5px; cursor:pointer; }
+/* NAV */
+.nav { position:fixed; bottom:0; width:100%; background:rgba(20,20,20,0.95); border-top:1px solid var(--border); display:flex; justify-content:space-around; padding:10px 0 25px; z-index:1000; backdrop-filter:blur(10px); }
+.nav-btn { background:none; border:none; color:#555; display:flex; flex-direction:column; align-items:center; gap:4px; font-size:10px; font-weight:600; cursor:pointer; }
+.nav-btn.active { color:var(--neon-blue); }
+.nav-icon { font-size:20px; }
+.view { display:none; } .view.active { display:block; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(5px)} to{opacity:1;transform:translateY(0)} }
+@media print { .nav, .header, .search-area, .day-scroll, .add { display:none!important; } .view { display:block!important; } body{background:#fff;color:#000;} .item{border:1px solid #ccc; background:#fff; color:#000; break-inside:avoid;} .i-ing{color:#555;} }
+</style>
 </head>
 <body>
 
-    <div id="view-home" class="view active">
-        <div class="header">
-            <h1>MaldoFit<span style="color:var(--primary)">.Pro</span></h1>
-            <button class="btn-obj" onclick="openModal()">OBJETIVOS</button>
-        </div>
-
-        <div class="day-scroll">
-            <div class="tab-pill active" onclick="setDay('Lunes', this)">Lunes</div>
-            <div class="tab-pill" onclick="setDay('Martes', this)">Martes</div>
-            <div class="tab-pill" onclick="setDay('Miércoles', this)">Miércoles</div>
-            <div class="tab-pill" onclick="setDay('Jueves', this)">Jueves</div>
-            <div class="tab-pill" onclick="setDay('Viernes', this)">Viernes</div>
-            <div class="tab-pill" onclick="setDay('Sábado', this)">Sábado</div>
-            <div class="tab-pill" onclick="setDay('Domingo', this)">Domingo</div>
-        </div>
-
-        <div class="dashboard">
-            <div class="dash-card">
-                <span class="dash-val" id="d-k">0</span><span class="dash-lbl">Kcal</span>
-                <div class="bar-bg"><div id="b-k" class="bar-fill" style="background:#fff"></div></div>
-            </div>
-            <div class="dash-card">
-                <span class="dash-val" id="d-p">0</span><span class="dash-lbl">Prot</span>
-                <div class="bar-bg"><div id="b-p" class="bar-fill" style="background:var(--danger)"></div></div>
-            </div>
-            <div class="dash-card">
-                <span class="dash-val" id="d-c">0</span><span class="dash-lbl">Carb</span>
-                <div class="bar-bg"><div id="b-c" class="bar-fill" style="background:var(--warning)"></div></div>
-            </div>
-            <div class="dash-card">
-                <span class="dash-val" id="d-f">0</span><span class="dash-lbl">Grasa</span>
-                <div class="bar-bg"><div id="b-f" class="bar-fill" style="background:var(--success)"></div></div>
-            </div>
-        </div>
-
-        <div id="daily-list" class="meal-list"></div>
-        <div style="height:50px;"></div>
+<div id="v-home" class="view active">
+    <div class="header">
+        <h1>MaldoFit</h1>
+        <button class="btn-obj" onclick="openModal()">OBJETIVOS</button>
     </div>
+    <div class="day-scroll">
+        <div class="day-pill active" onclick="setDay('Lunes',this)">Lunes</div>
+        <div class="day-pill" onclick="setDay('Martes',this)">Martes</div>
+        <div class="day-pill" onclick="setDay('Miércoles',this)">Miércoles</div>
+        <div class="day-pill" onclick="setDay('Jueves',this)">Jueves</div>
+        <div class="day-pill" onclick="setDay('Viernes',this)">Viernes</div>
+        <div class="day-pill" onclick="setDay('Sábado',this)">Sábado</div>
+        <div class="day-pill" onclick="setDay('Domingo',this)">Domingo</div>
+    </div>
+    <div class="stats">
+        <div class="stat-box"><span class="s-val" id="v-k">0</span><span class="s-lbl">Kcal</span><div class="bar-bg"><div id="b-k" class="bar-fill" style="background:#fff"></div></div></div>
+        <div class="stat-box"><span class="s-val" id="v-p">0</span><span class="s-lbl">Prot</span><div class="bar-bg"><div id="b-p" class="bar-fill" style="background:var(--neon-red)"></div></div></div>
+        <div class="stat-box"><span class="s-val" id="v-c">0</span><span class="s-lbl">Carb</span><div class="bar-bg"><div id="b-c" class="bar-fill" style="background:var(--neon-yellow)"></div></div></div>
+        <div class="stat-box"><span class="s-val" id="v-f">0</span><span class="s-lbl">Grasa</span><div class="bar-bg"><div id="b-f" class="bar-fill" style="background:var(--neon-green)"></div></div></div>
+    </div>
+    <div id="list-plan" class="list"></div>
+</div>
 
-    <div id="view-lib" class="view">
-        <div class="header"><h1>Biblioteca</h1></div>
-        <div style="padding: 0 20px;">
-            <div style="position:sticky; top:70px; background:var(--bg-body); z-index:40; padding-bottom:10px; padding-top:10px;">
-                <input type="text" id="search" class="search-bar" placeholder="Buscar plato..." onkeyup="renderLib()">
-                <div class="cat-filter">
-                    <div class="filter-chip active" onclick="setCat('Desayuno', this)">Desayuno</div>
-                    <div class="filter-chip" onclick="setCat('Tentempié', this)">Media Mañana</div>
-                    <div class="filter-chip" onclick="setCat('Comida', this)">Comida</div>
-                    <div class="filter-chip" onclick="setCat('Merienda', this)">Merienda</div>
-                    <div class="filter-chip" onclick="setCat('Cena', this)">Cena</div>
-                </div>
-            </div>
-            <div id="lib-list" style="padding-bottom:100px;"></div>
+<div id="v-lib" class="view">
+    <div class="header"><h1>Alimentos</h1></div>
+    <div class="search-area">
+        <input type="text" id="search" class="search-inp" placeholder="Buscar plato..." onkeyup="renderLib()">
+        <div class="cats">
+            <div class="cat-tag active" onclick="setCat('Desayuno',this)">Desayuno</div>
+            <div class="cat-tag" onclick="setCat('Tentempié',this)">Media Mañana</div>
+            <div class="cat-tag" onclick="setCat('Comida',this)">Comida</div>
+            <div class="cat-tag" onclick="setCat('Merienda',this)">Merienda</div>
+            <div class="cat-tag" onclick="setCat('Cena',this)">Cena</div>
         </div>
     </div>
+    <div id="list-lib" class="list" style="padding-bottom:100px"></div>
+</div>
 
-    <div id="modal">
-        <div class="modal-body">
-            <h2 style="color:var(--primary); margin-top:0">Configuración</h2>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-                <div class="input-group"><label class="input-label">Peso (kg)</label><input type="number" id="w" class="input-field" value="80"></div>
-                <div class="input-group"><label class="input-label">Altura (cm)</label><input type="number" id="h" class="input-field" value="180"></div>
-                <div class="input-group"><label class="input-label">Edad</label><input type="number" id="a" class="input-field" value="30"></div>
-                <div class="input-group"><label class="input-label">Sexo</label>
-                    <select id="s" class="input-field"><option value="m">Hombre</option><option value="f">Mujer</option></select>
-                </div>
-            </div>
-            <div class="input-group">
-                <label class="input-label">Actividad</label>
-                <select id="act" class="input-field">
-                    <option value="1.2">Sedentario</option>
-                    <option value="1.375">Ligero</option>
-                    <option value="1.55" selected>CrossFit (3-5 días)</option>
-                    <option value="1.725">Alto Rendimiento</option>
-                </select>
-            </div>
-            <div class="input-group">
-                <label class="input-label">Objetivo</label>
-                <select id="goal" class="input-field" style="border-color:var(--accent)">
-                    <option value="-0.2">Definición Agresiva (-20%)</option>
-                    <option value="-0.1">Definición Moderada (-10%)</option>
-                    <option value="0">Mantenimiento</option>
-                    <option value="0.1">Volumen Limpio (+10%)</option>
-                    <option value="0.2">Volumen Agresivo (+20%)</option>
-                </select>
-            </div>
-            <button class="btn-full" onclick="calcMacros()">Calcular y Guardar</button>
-            <button onclick="document.getElementById('modal').style.display='none'" style="width:100%; padding:15px; background:none; border:none; color:#666; margin-top:10px;">Cerrar</button>
+<div id="modal">
+    <div class="modal-c">
+        <h2 style="color:var(--neon-blue);margin-top:0">Configuración</h2>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <div class="inp-grp"><label class="inp-lbl">Peso</label><input type="number" id="w" class="inp" value="80"></div>
+            <div class="inp-grp"><label class="inp-lbl">Altura</label><input type="number" id="h" class="inp" value="180"></div>
+            <div class="inp-grp"><label class="inp-lbl">Edad</label><input type="number" id="a" class="inp" value="30"></div>
+            <div class="inp-grp"><label class="inp-lbl">Sexo</label><select id="s" class="inp"><option value="m">H</option><option value="f">M</option></select></div>
         </div>
+        <div class="inp-grp"><label class="inp-lbl">Actividad</label>
+            <select id="act" class="inp">
+                <option value="1.2">Sedentario</option>
+                <option value="1.375">Ligero</option>
+                <option value="1.55" selected>CrossFit (3-5 días)</option>
+                <option value="1.725">Alto</option>
+                <option value="1.9">Pro</option>
+            </select>
+        </div>
+        <div class="inp-grp"><label class="inp-lbl">Objetivo</label>
+            <select id="goal" class="inp" style="border-color:var(--neon-pink)">
+                <option value="-0.2">Definición Agresiva (-20%)</option>
+                <option value="-0.1">Definición Moderada (-10%)</option>
+                <option value="0">Mantenimiento</option>
+                <option value="0.1">Volumen Limpio (+10%)</option>
+                <option value="0.2">Volumen Agresivo (+20%)</option>
+            </select>
+        </div>
+        <button class="btn-save" onclick="calc()">Calcular y Guardar</button>
+        <button class="btn-close" onclick="document.getElementById('modal').style.display='none'">Cerrar</button>
     </div>
+</div>
 
-    <div class="navbar">
-        <button class="nav-btn active" onclick="go('view-home', this)"><span class="nav-icon">📅</span>Plan</button>
-        <button class="nav-btn" onclick="go('view-lib', this)"><span class="nav-icon">🍔</span>Alimentos</button>
-        <button class="nav-btn" onclick="window.print()"><span class="nav-icon">🖨️</span>PDF</button>
-    </div>
+<div class="nav">
+    <button class="nav-btn active" onclick="go('v-home',this)"><span class="nav-icon">📅</span>Plan</button>
+    <button class="nav-btn" onclick="go('v-lib',this)"><span class="nav-icon">🍔</span>Alimentos</button>
+    <button class="nav-btn" onclick="window.print()"><span class="nav-icon">🖨️</span>PDF</button>
+</div>
 
-    <script>
-        // --- BASE DE DATOS MASIVA (360+ PLATOS) ---
-        // Se ha comprimido el formato para que quepa todo.
-        const foodDB = [
-{id:1,type:"Desayuno",name:"Desayuno Completo Pavo",kcal:781,p:30,c:120,f:20,ings:"Leche (150g), Pan (100g), Pavo (45g), Queso (45g), Plátano (125g), Nuez (5g)"},
-{id:2,type:"Tentempié",name:"Yogur Griego con Granada",kcal:335,p:11,c:46,f:14,ings:"Yogur griego (125g), Avellana (15g), Granada (200g)"},
-{id:3,type:"Comida",name:"Alubias con acelgas",kcal:329,p:16,c:52,f:6,ings:"Alubias (210g), Patata (100g), Acelgas (100g), Aceite (5g)"},
-{id:4,type:"Comida",name:"Pollo asado",kcal:495,p:93,c:0,f:12,ings:"Pollo asado (300g)"},
-{id:5,type:"Merienda",name:"Pan Centeno y Hummus",kcal:192,p:6,c:37,f:2,ings:"Pan centeno (40g), Hummus (15g), Naranja (130g)"},
-{id:6,type:"Merienda",name:"Bocadillo Pavo Tomate",kcal:129,p:7,c:21,f:1,ings:"Pan (40g), Tomate (45g), Pavo (15g)"},
-{id:7,type:"Cena",name:"Tortilla espinacas",kcal:166,p:13,c:2,f:11,ings:"Claras (35g), Huevo (60g), Espinaca (50g), Queso (62g)"},
-{id:8,type:"Desayuno",name:"Bebida Avena y Tostada",kcal:1687,p:76,c:258,f:39,ings:"Leche (225g), Avena (300g), Pan (100g), Pavo (45g), Aceite (8g)"},
-{id:9,type:"Tentempié",name:"Bocadillo Bonito",kcal:687,p:7,c:37,f:57,ings:"Pan (70g), Bonito (55g), Tomate (90g)"},
-{id:10,type:"Comida",name:"Espaguetis con Pavo",kcal:340,p:14,c:20,f:23,ings:"Yogur (60g), Pavo (40g), Espagueti (60g)"},
-{id:11,type:"Comida",name:"Salmón y zanahoria",kcal:581,p:56,c:9,f:33,ings:"Salmón (170g), Zanahoria (80g), Maíz (50g), Aceite (8g)"},
-{id:12,type:"Merienda",name:"Mandarina",kcal:63,p:1,c:15,f:0,ings:"Mandarina (120g)"},
-{id:13,type:"Cena",name:"Atún con berenjenas",kcal:276,p:43,c:9,f:6,ings:"Aceite (5g), Berenjena (150g), Atún (150g)"},
-{id:14,type:"Tentempié",name:"Bocadillo Sardinas",kcal:721,p:6,c:35,f:62,ings:"Pan (70g), Tomate (30g), Sardinas (60g)"},
-{id:15,type:"Comida",name:"Lentejas con pimiento",kcal:277,p:17,c:42,f:5,ings:"Lentejas (175g), Pimiento (150g), Aceite (5g)"},
-{id:16,type:"Comida",name:"Lomo con patatas",kcal:518,p:38,c:25,f:28,ings:"Lomo (130g), Aceite (10g), Patata (150g)"},
-{id:17,type:"Merienda",name:"Hummus con Centeno",kcal:192,p:6,c:37,f:2,ings:"Pan centeno (40g), Hummus (15g), Naranja (130g)"},
-{id:18,type:"Cena",name:"Lenguado con Brócoli",kcal:329,p:52,c:8,f:10,ings:"Lenguado (270g), Brócoli (125g), Aceite (5g)"},
-{id:19,type:"Comida",name:"Arroz con Anchoas",kcal:378,p:4,c:24,f:29,ings:"Arroz (80g), Anchoas (20g), Nuez (15g)"},
-{id:20,type:"Comida",name:"Caballa con Brócoli",kcal:496,p:41,c:8,f:33,ings:"Caballa (200g), Brócoli (125g), Aceite (5g)"},
-{id:21,type:"Merienda",name:"Bocadillo Salmón",kcal:322,p:9,c:68,f:2,ings:"Pan (70g), Tomate (90g), Salmón ahumado (30g)"},
-{id:22,type:"Cena",name:"Tortilla francesa aceitunas",kcal:229,p:9,c:11,f:16,ings:"Huevo (60g), Aceite (8g), Tomate (150g), Cebolla (40g), Aceituna (20g)"},
-{id:23,type:"Desayuno",name:"Pan Integral con Almendras",kcal:1657,p:66,c:95,f:121,ings:"Leche (225g), Bebida almendras (225g), Pan (70g), Pavo (30g)"},
-{id:24,type:"Comida",name:"Macarrones con tomate",kcal:137,p:5,c:27,f:0,ings:"Macarrones (80g), Tomate (60g), Orégano (2g)"},
-{id:25,type:"Cena",name:"Pechuga Pollo con Rúcula",kcal:457,p:64,c:8,f:18,ings:"Aceite (10g), Lechuga (80g), Tomate (150g), Pollo (200g)"},
-{id:26,type:"Desayuno",name:"Pan con Jamón y Plátano",kcal:343,p:13,c:51,f:9,ings:"Leche (150g), Yogur (125g), Pan (40g), Cacahuete (15g), Plátano (80g)"},
-{id:27,type:"Comida",name:"Garbanzos con espinacas",kcal:397,p:20,c:60,f:10,ings:"Aceite (5g), Cebolla (75g), Espinaca (125g), Garbanzos (175g)"},
-{id:28,type:"Comida",name:"Sepia con aguacate",kcal:256,p:21,c:6,f:17,ings:"Aceite (5g), Mozzarella (50g), Sepia (125g), Aguacate (50g), Piñones (5g)"},
-{id:29,type:"Merienda",name:"Merienda Jamón Serrano",kcal:285,p:10,c:49,f:6,ings:"Pan (40g), Jamón serrano (15g), Plátano (125g), Nuez (5g)"},
-{id:30,type:"Cena",name:"Pavo con tomate",kcal:199,p:28,c:5,f:7,ings:"Pavo (125g), Aceite (5g), Tomate (45g), Zanahoria (40g)"},
-{id:31,type:"Desayuno",name:"Desayuno Completo Jamón",kcal:455,p:14,c:77,f:10,ings:"Leche (150g), Pan (40g), Manzana (150g), Jamón serrano (15g), Plátano (125g), Nuez (5g)"},
-{id:32,type:"Comida",name:"Arroz con Surimi",kcal:295,p:4,c:28,f:20,ings:"Arroz (70g), Surimi (32g), Aguacate (100g), Aceite (5g)"},
-{id:33,type:"Comida",name:"Filete Atún en Salsa",kcal:130,p:28,c:0,f:1,ings:"Filete de atún (100g)"},
-{id:34,type:"Merienda",name:"Bocadillo Salmón y Fruta",kcal:289,p:9,c:50,f:6,ings:"Pan (40g), Tomate (45g), Salmón ahumado (15g), Plátano (125g), Nuez (5g)"},
-{id:35,type:"Cena",name:"Caballa con Canónigos",kcal:383,p:30,c:6,f:26,ings:"Caballa (150g), Canónigos (30g), Maíz (30g), Aceite (5g)"},
-{id:36,type:"Desayuno",name:"Desayuno Pavo y Naranja",kcal:446,p:26,c:65,f:9,ings:"Leche (225g), Naranja (270g), Pavo (60g), Pan tostado (45g)"},
-{id:37,type:"Tentempié",name:"Plátano y Almendras",kcal:316,p:6,c:56,f:10,ings:"Plátano (225g), Almendra (20g)"},
-{id:38,type:"Comida",name:"Garbanzos con Atún",kcal:606,p:50,c:64,f:17,ings:"Garbanzos (200g), Tomate (150g), Cebolla (50g), Atún (110g), Aceite (10g)"},
-{id:39,type:"Comida",name:"Pechuga Pollo y Maíz",kcal:280,p:52,c:0,f:6,ings:"Pechuga pollo (170g), Maíz (300g)"},
-{id:40,type:"Merienda",name:"Fajita Salmón",kcal:122,p:10,c:0,f:8,ings:"Fajita (40g), Guacamole (40g), Salmón ahumado (30g)"},
-{id:41,type:"Merienda",name:"Plátano",kcal:178,p:2,c:46,f:0,ings:"Plátano (200g)"},
-{id:42,type:"Cena",name:"Huevos con Jamón",kcal:658,p:49,c:35,f:35,ings:"Pan (70g), Huevo (120g), Aceite (8g), Jamón serrano (90g)"},
-{id:43,type:"Desayuno",name:"Avena y Yogur",kcal:757,p:30,c:107,f:22,ings:"Leche (225g), Plátano (160g), Leche desnatada (400g), Avena (60g)"},
-{id:44,type:"Tentempié",name:"Tortitas Arroz Guacamole",kcal:99,p:9,c:5,f:3,ings:"Tortitas (21g), Guacamole (40g), Jamón cocido (30g)"},
-{id:45,type:"Comida",name:"Lasaña Salmón Brócoli",kcal:807,p:66,c:25,f:50,ings:"Lasaña (250g), Caballa (300g), Aceite (8g), Tomate (200g)"},
-{id:46,type:"Merienda",name:"Vaso Leche Avena",kcal:253,p:11,c:31,f:8,ings:"Leche desnatada (225g), Avena (30g)"},
-{id:47,type:"Cena",name:"Trucha con Acelgas",kcal:317,p:9,c:43,f:12,ings:"Pan (70g), Trucha (450g), Aceite (10g), Acelgas (150g)"},
-{id:48,type:"Comida",name:"Alubias con Sésamo",kcal:228,p:11,c:32,f:5,ings:"Alubias (175g), Tomate (100g), Sésamo (15g), Aceite (5g)"},
-{id:49,type:"Comida",name:"Solomillo Cerdo Zanahoria",kcal:765,p:69,c:17,f:45,ings:"Aceite (10g), Lechuga (100g), Zanahoria (140g), Solomillo cerdo (250g)"},
-{id:50,type:"Cena",name:"Dorada con Tomate",kcal:682,p:75,c:51,f:19,ings:"Pan (70g), Dorada (370g), Cebolla (100g), Tomate (200g), Aceite (10g)"},
-{id:51,type:"Desayuno",name:"Tortitas Avena Claras",kcal:557,p:27,c:66,f:21,ings:"Leche (225g), Zumo naranja (200g), Claras (105g), Aceite (3g), Avena (30g), Miel (10g), Nuez (15g)"},
-{id:52,type:"Comida",name:"Arroz con Pepino",kcal:281,p:5,c:42,f:10,ings:"Arroz (120g), Pepino (125g), Tomate (100g), Aceite (10g)"},
-{id:53,type:"Merienda",name:"Avena con Leche",kcal:358,p:16,c:44,f:12,ings:"Leche desnatada (300g), Avena (45g)"},
-{id:54,type:"Cena",name:"Cena del Varios",kcal:426,p:28,c:39,f:16,ings:"Pan (70g), Claras (105g), Huevo (60g), Espinaca (100g), MG (75g), Aceite (8g)"},
-{id:55,type:"Comida",name:"Espirales con Anchoas",kcal:360,p:1,c:5,f:38,ings:"Espirales (90g), Tomate (120g), Anchoas (28g), Aceite (10g), Albahaca (5g)"},
-{id:56,type:"Comida",name:"Pavo con Rúcula",kcal:279,p:39,c:6,f:11,ings:"Pavo (175g), Aceite (8g), Rúcula (50g), Zanahoria (60g)"},
-{id:57,type:"Cena",name:"Pollo con Pisto",kcal:466,p:58,c:34,f:8,ings:"Pan (70g), Pollo (170g), Pisto (175g)"},
-{id:58,type:"Desayuno",name:"Desayuno: Leche entera...",kcal:511,p:25,c:62,f:19,ings:"Leche (150g), Zumo naranja (200g), Claras (105g), Aceite (3g), Avena (30g), Miel (10g), Nuez (15g)"},
-{id:59,type:"Comida",name:"Lentejas con Queso Cabra",kcal:522,p:24,c:44,f:29,ings:"Lentejas (175g), Nuez (20g), Queso cabra (40g), Aceite (8g), Tomate (120g)"},
-{id:60,type:"Comida",name:"Lubina con Acelgas",kcal:240,p:34,c:4,f:8,ings:"Lubina (180g), Aceite (5g), Acelgas (75g)"},
-{id:61,type:"Merienda",name:"Bocadillo Bonito",kcal:671,p:6,c:34,f:57,ings:"Pan (70g), Bonito (55g)"},
-{id:62,type:"Cena",name:"Lomo con Rúcula",kcal:819,p:61,c:49,f:40,ings:"Pan (70g), Aceite (10g), Rúcula (50g), Zanahoria (80g), Lomo (200g)"},
-{id:63,type:"Comida",name:"Arroz con Huevo y Pipas",kcal:251,p:11,c:23,f:12,ings:"Huevo (65g), Aceite (5g), Tomate (70g), Arroz (70g), Pipas (10g)"},
-{id:64,type:"Comida",name:"Trucha con Tomate",kcal:61,p:0,c:3,f:5,ings:"Trucha (200g), Aceite (5g), Tomate (90g), Perejil (2g)"},
-{id:65,type:"Merienda",name:"Bocadillo Jamón y Tomate",kcal:262,p:15,c:35,f:6,ings:"Pan (70g), Jamón serrano (30g), Tomate frito (30g)"},
-{id:66,type:"Cena",name:"Cena del Varios",kcal:566,p:64,c:46,f:12,ings:"Pan (70g), Aceite (8g), Berenjena (200g), Atún (200g)"},
-{id:67,type:"Desayuno",name:"Desayuno Pavo y Naranja",kcal:400,p:24,c:61,f:7,ings:"Leche (150g), Naranja (270g), Pavo (60g), MG (140g), Pan tostado (45g)"},
-{id:68,type:"Tentempié",name:"Yogur y Plátano",kcal:217,p:6,c:43,f:3,ings:"Yogur (125g), Plátano (160g)"},
-{id:69,type:"Comida",name:"Pollo con Tortilla",kcal:439,p:65,c:1,f:17,ings:"Huevo (60g), Pollo (150g), Claras (105g), Aceite (5g)"},
-{id:70,type:"Merienda",name:"Yogur con Crema Cacahuete",kcal:850,p:7,c:10,f:90,ings:"Yogur (250g), Cacao (10g), Cacahuete (15g)"},
-{id:71,type:"Cena",name:"Revuelto Caballa Hummus",kcal:708,p:10,c:4,f:73,ings:"Huevo (60g), Caballa (56g), Aceite (8g), Hummus (30g)"},
-{id:72,type:"Desayuno",name:"Desayuno Avena y Plátano",kcal:560,p:22,c:80,f:16,ings:"Leche (150g), Plátano (125g), Leche desnatada (300g), Avena (45g)"},
-{id:73,type:"Comida",name:"Macarrones con Salmón",kcal:206,p:7,c:13,f:13,ings:"Macarrones (40g), Salmón ahumado (20g), Queso batido (30g)"},
-{id:74,type:"Comida",name:"Caballa con Canónigos",kcal:383,p:30,c:6,f:26,ings:"Caballa (150g), Canónigos (30g), Maíz (30g), Aceite (5g)"},
-{id:75,type:"Merienda",name:"Yogur Griego con Almendras",kcal:1204,p:45,c:49,f:101,ings:"Yogur griego (125g), Almendra (15g), Mandarina (180g)"},
-{id:76,type:"Cena",name:"Atún con Lechuga",kcal:303,p:44,c:8,f:9,ings:"Atún (150g), Lechuga (70g), Tomate (150g), Aceite (8g)"},
-{id:77,type:"Tentempié",name:"Yogur y Plátano",kcal:328,p:12,c:58,f:7,ings:"Yogur (250g), Plátano (200g)"},
-{id:78,type:"Comida",name:"Lentejas con Queso Cabra",kcal:322,p:14,c:26,f:18,ings:"Lentejas (100g), Nuez (15g), Queso cabra (20g), Aceite (8g), Tomate (90g)"},
-{id:79,type:"Comida",name:"Lomo con Berenjena",kcal:604,p:56,c:12,f:36,ings:"Aceite (8g), Berenjena (200g), Lomo (200g)"},
-{id:80,type:"Cena",name:"Lenguado con Rúcula",kcal:425,p:64,c:5,f:17,ings:"Lenguado (350g), Rúcula (50g), Tomate (125g), Aceite (10g)"},
-{id:81,type:"Desayuno",name:"Tortitas con Zumo Naranja",kcal:587,p:28,c:83,f:18,ings:"Zumo naranja (300g), Claras (140g), Aceite (3g), Avena (40g), Miel (20g), Nuez (20g)"},
-{id:82,type:"Comida",name:"Arroz con Remolacha",kcal:96,p:1,c:11,f:5,ings:"Arroz (40g), Aceite (5g), Remolacha (24g), Pepinillos (30g)"},
-{id:83,type:"Comida",name:"Atún con Verduras",kcal:234,p:50,c:0,f:1,ings:"Atún con verduras (180g)"},
-{id:84,type:"Cena",name:"Tortilla Queso y Pimientos",kcal:203,p:14,c:4,f:14,ings:"Queso untar (15g), Claras (35g), Huevo (60g), Aceite (5g), Pimiento (60g)"},
-{id:85,type:"Comida",name:"Espirales con Anchoas",kcal:237,p:0,c:3,f:25,ings:"Espirales (70g), Tomate (90g), Anchoas (20g), Aceite (5g), Albahaca (5g)"},
-{id:86,type:"Cena",name:"Pollo con Pisto",kcal:280,p:52,c:0,f:6,ings:"Pollo (170g), Pisto (175g)"},
-{id:87,type:"Tentempié",name:"Tortitas Guacamole y Jamón",kcal:99,p:9,c:5,f:3,ings:"Tortitas (21g), Guacamole (40g), Jamón cocido (30g)"},
-{id:88,type:"Comida",name:"Alubias con Sésamo",kcal:142,p:6,c:16,f:5,ings:"Alubias (100g), Tomate (45g), Sésamo (10g), Aceite (5g)"},
-{id:89,type:"Comida",name:"Lubina con Aguacate",kcal:303,p:28,c:5,f:18,ings:"Aceite (5g), Mozzarella (50g), Lubina (150g), Aguacate (50g), Piñones (5g)"},
-{id:90,type:"Merienda",name:"Yogur Griego Almendras",kcal:827,p:32,c:34,f:68,ings:"Yogur griego (125g), Almendra (10g), Mandarina (120g)"},
-{id:91,type:"Cena",name:"Lomo con Lechuga",kcal:300,p:27,c:3,f:19,ings:"Aceite (5g), Lechuga (40g), Tomate (45g), Lomo (100g)"},
-{id:92,type:"Comida",name:"Arroz Tres Delicias",kcal:669,p:10,c:126,f:13,ings:"Arroz (300g), Aceite (8g), Espárrago (50g), Lechuga (30g), Tomate (90g), Trucha (250g), Aceite (5g)"},
-{id:93,type:"Cena",name:"Salmón con Canónigos",kcal:325,p:25,c:6,f:20,ings:"Salmón (120g), Canónigos (30g), Maíz (30g), Aceite (5g)"},
-{id:94,type:"Desayuno",name:"Yogur con Aguacate y Pavo",kcal:924,p:25,c:56,f:68,ings:"Yogur (125g), Nuez (10g), Pan (70g), Aguacate (50g), Pavo (30g), Leche desnatada (225g), Café (50g)"},
-{id:95,type:"Comida",name:"Ensalada Garbanzos",kcal:341,p:15,c:52,f:9,ings:"Tomate (75g), Cebolla (60g), Pimiento (75g), Garbanzos (175g), Aceite (5g)"},
-{id:96,type:"Comida",name:"Sepia con Brócoli",kcal:218,p:36,c:5,f:6,ings:"Aceite (5g), Brócoli (200g), Sepia (200g)"},
-{id:97,type:"Merienda",name:"Merienda Jamón y Tomate",kcal:307,p:21,c:44,f:6,ings:"Pan (70g), Tomate (30g), Jamón cocido (30g)"},
-{id:98,type:"Cena",name:"Sopa de Pollo",kcal:366,p:34,c:33,f:11,ings:"Sopa pollo (300g), Pollo (100g), Huevo (60g)"},
-{id:99,type:"Desayuno",name:"Desayuno Completo",kcal:381,p:19,c:63,f:6,ings:"Leche (225g), Café (50g), Plátano (200g), Jamón cocido (45g), Pan tostado (36g)"},
-{id:100,type:"Comida",name:"Arroz con Tomate y Atún",kcal:348,p:18,c:45,f:10,ings:"Arroz (60g), Tomate (60g), Atún (56g), Huevo (60g)"},
-{id:101,type:"Cena",name:"Tortilla de Patatas",kcal:340,p:14,c:25,f:20,ings:"Huevo (120g), Aceite (8g), Patata (100g), Cebolla (50g)"},
-{id:102,type:"Desayuno",name:"Avena y Plátano",kcal:296,p:13,c:49,f:6,ings:"Leche desnatada (200g), Avena (40g), Plátano (80g)"},
-{id:103,type:"Comida",name:"Lentejas con Arroz",kcal:312,p:12,c:55,f:5,ings:"Lentejas (150g), Arroz (80g), Zanahoria (50g), Aceite (5g)"},
-{id:104,type:"Merienda",name:"Papilla Arroz y Proteína",kcal:380,p:30,c:60,f:2,ings:"Harina arroz (70g), Proteína (30g), Miel (20g), Arándanos (60g)"},
-{id:105,type:"Cena",name:"Merluza al Horno",kcal:235,p:20,c:25,f:6,ings:"Merluza (150g), Patata (120g), Cebolla (50g), Aceite (5g)"},
-{id:106,type:"Desayuno",name:"Pan con Aguacate y Pavo",kcal:285,p:12,c:25,f:15,ings:"Pan (50g), Aguacate (40g), Pavo (30g)"},
-{id:107,type:"Tentempié",name:"Pan con Aguacate y Huevo",kcal:403,p:18,c:39,f:19,ings:"Pan (70g), Aguacate (50g), Huevo (60g), Claras (35g), Aceite (3g)"},
-{id:108,type:"Comida",name:"Pollo al Curry",kcal:410,p:35,c:45,f:10,ings:"Pollo (150g), Arroz (60g), Leche coco (50g), Curry (2g)"},
-{id:109,type:"Merienda",name:"Plátano y Pan Wasa",kcal:337,p:6,c:55,f:12,ings:"Plátano (125g), Pan Wasa (40g), Aguacate (75g)"},
-{id:110,type:"Cena",name:"Ensalada Atún y Huevo",kcal:290,p:25,c:5,f:18,ings:"Lechuga (100g), Atún (60g), Huevo (60g), Tomate (100g), Aceite (8g)"},
-{id:111,type:"Comida",name:"Guisantes con Atún",kcal:606,p:50,c:64,f:17,ings:"Guisantes (200g), Tomate (150g), Cebolla (50g), Atún (110g), Aceite (10g)"},
-{id:112,type:"Merienda",name:"Leche y Avena",kcal:253,p:11,c:31,f:8,ings:"Leche desnatada (225g), Avena (30g)"},
-{id:113,type:"Cena",name:"Trucha con Acelgas",kcal:317,p:9,c:43,f:12,ings:"Pan (70g), Trucha (450g), Aceite (10g), Acelgas (150g), Ajo (10g)"},
-{id:114,type:"Comida",name:"Solomillo Cerdo",kcal:765,p:69,c:17,f:45,ings:"Aceite (10g), Lechuga (100g), Zanahoria (140g), Solomillo (250g)"},
-{id:115,type:"Cena",name:"Dorada con Tomate",kcal:682,p:75,c:51,f:19,ings:"Pan (70g), Dorada (370g), Cebolla (100g), Tomate (200g), Aceite (10g)"},
-{id:116,type:"Desayuno",name:"Tortitas con Zumo",kcal:557,p:27,c:66,f:21,ings:"Leche (225g), Café (50g), Zumo (200g), Claras (105g), Aceite (3g), Avena (30g), Miel (10g), Nuez (15g)"},
-{id:117,type:"Comida",name:"Lentejas Queso Cabra",kcal:522,p:24,c:44,f:29,ings:"Lentejas (175g), Nuez (20g), Queso cabra (40g), Aceite (8g), Tomate (120g)"},
-{id:118,type:"Comida",name:"Lubina con Acelgas",kcal:240,p:34,c:4,f:8,ings:"Lubina (180g), Aceite (5g), Acelgas (75g), Ajo (5g)"},
-{id:119,type:"Merienda",name:"Bocadillo Bonito",kcal:671,p:6,c:34,f:57,ings:"Pan (70g), Bonito (55g)"},
-{id:120,type:"Cena",name:"Lomo con Rúcula",kcal:819,p:61,c:49,f:40,ings:"Pan (70g), Aceite (10g), Rúcula (50g), Zanahoria (80g), Lomo (200g)"},
-{id:121,type:"Comida",name:"Arroz con Huevo",kcal:251,p:11,c:23,f:12,ings:"Huevo (65g), Aceite (5g), Tomate (70g), Arroz (70g), Pipas (10g)"},
-{id:122,type:"Comida",name:"Espirales con Anchoas",kcal:360,p:1,c:5,f:38,ings:"Espirales (90g), Tomate (120g), Anchoas (28g), Aceite (10g), Albahaca (5g)"},
-{id:123,type:"Comida",name:"Pavo con Rúcula",kcal:279,p:39,c:6,f:11,ings:"Pavo (175g), Aceite (8g), Rúcula (50g), Zanahoria (60g)"},
-{id:124,type:"Cena",name:"Pollo con Pisto",kcal:466,p:58,c:34,f:8,ings:"Pan (70g), Pollo (170g), Pisto (175g)"},
-{id:125,type:"Desayuno",name:"Desayuno Pavo y Naranja",kcal:511,p:25,c:62,f:19,ings:"Leche (150g), Zumo (200g), Claras (105g), Aceite (3g), Avena (30g), Miel (10g), Nuez (15g)"},
-{id:126,type:"Desayuno",name:"Avena y Yogur",kcal:693,p:27,c:84,f:28,ings:"Leche (150g), Leche desnatada (225g), Yogur (250g), Avena (60g), Chocolate (40g)"},
-{id:127,type:"Tentempié",name:"Tostada Jamón",kcal:386,p:23,c:52,f:8,ings:"Pan (100g), Tomate (75g), Jamón serrano (45g)"},
-{id:128,type:"Comida",name:"Macarrones con Surimi",kcal:115,p:2,c:14,f:5,ings:"Macarrones (40g), Surimi (16g), Tomate (45g), Aceite (5g)"},
-{id:129,type:"Comida",name:"Caballa con Acelgas",kcal:373,p:30,c:4,f:26,ings:"Caballa (150g), Aceite (5g), Acelgas (75g), Ajo (5g)"},
-{id:130,type:"Merienda",name:"Yogur y Frutos Secos",kcal:982,p:23,c:25,f:94,ings:"Yogur (125g), Nuez (5g), Pistacho (5g), Almendra (5g), Fresa (80g)"},
-{id:131,type:"Cena",name:"Lenguado con Brócoli",kcal:436,p:67,c:10,f:15,ings:"Lenguado (350g), Brócoli (150g), Aceite (8g)"},
-{id:132,type:"Comida",name:"Arroz y Salmón",kcal:647,p:41,c:43,f:32,ings:"Arroz (125g), Aceite (5g), Salmón (170g), Brócoli (125g)"},
-{id:133,type:"Cena",name:"Tortilla Espinacas",kcal:241,p:22,c:5,f:14,ings:"Huevo (60g), Espinaca (100g), Aceite (8g), Claras (105g), Sésamo (5g)"},
-{id:134,type:"Desayuno",name:"Desayuno Pavo y Aguacate",kcal:253,p:11,c:29,f:9,ings:"Leche (150g), Pan (40g), Aguacate (25g), Pavo (15g)"},
-{id:135,type:"Comida",name:"Pavo con Maíz",kcal:201,p:28,c:5,f:7,ings:"Pavo (125g), Aceite (5g), Guisantes (30g), Maíz (30g)"},
-{id:136,type:"Cena",name:"Pavo con Champiñones",kcal:175,p:27,c:0,f:7,ings:"Aceite (5g), Champiñón (75g), Pavo (125g)"},
-{id:137,type:"Comida",name:"Arroz con Remolacha",kcal:96,p:1,c:11,f:5,ings:"Arroz (40g), Aceite (5g), Remolacha (24g), Pepinillos (30g)"},
-{id:138,type:"Comida",name:"Atún con Verduras",kcal:234,p:50,c:0,f:1,ings:"Atún con verduras (180g)"},
-{id:139,type:"Cena",name:"Tortilla con Pimientos",kcal:203,p:14,c:4,f:14,ings:"Queso (15g), Claras (35g), Huevo (60g), Aceite (5g), Pimiento (60g)"},
-{id:140,type:"Comida",name:"Espirales con Anchoas",kcal:237,p:0,c:3,f:25,ings:"Espirales (70g), Tomate (90g), Anchoas (20g), Aceite (5g), Albahaca (5g)"},
-{id:141,type:"Cena",name:"Pollo con Pisto",kcal:280,p:52,c:0,f:6,ings:"Pollo (170g), Pisto (175g)"},
-{id:142,type:"Tentempié",name:"Tortitas Guacamole",kcal:99,p:9,c:5,f:3,ings:"Tortitas (21g), Guacamole (40g), Jamón cocido (30g)"},
-{id:143,type:"Comida",name:"Alubias con Sésamo",kcal:142,p:6,c:16,f:5,ings:"Alubias (100g), Tomate (45g), Sésamo (10g), Aceite (5g)"},
-{id:144,type:"Comida",name:"Lubina con Aguacate",kcal:303,p:28,c:5,f:18,ings:"Aceite (5g), Mozzarella (50g), Lubina (150g), Aguacate (50g), Piñones (5g)"},
-{id:145,type:"Merienda",name:"Yogur y Almendras",kcal:827,p:32,c:34,f:68,ings:"Yogur (125g), Almendra (10g), Mandarina (120g)"},
-{id:146,type:"Cena",name:"Lomo con Lechuga",kcal:300,p:27,c:3,f:19,ings:"Aceite (5g), Lechuga (40g), Tomate (45g), Lomo (100g)"},
-{id:147,type:"Comida",name:"Arroz Tres Delicias",kcal:669,p:10,c:126,f:13,ings:"Arroz (300g), Aceite (8g), Espárrago (50g), Lechuga (30g), Tomate (90g), Trucha (250g), Aceite (5g)"},
-{id:148,type:"Cena",name:"Salmón con Canónigos",kcal:325,p:25,c:6,f:20,ings:"Salmón (120g), Canónigos (30g), Maíz (30g), Aceite (5g)"},
-{id:149,type:"Desayuno",name:"Yogur Pavo y Aguacate",kcal:924,p:25,c:56,f:68,ings:"Yogur (125g), Nuez (10g), Pan (70g), Aguacate (50g), Pavo (30g), Leche (225g)"},
-{id:150,type:"Comida",name:"Ensalada Garbanzos",kcal:341,p:15,c:52,f:9,ings:"Tomate (75g), Cebolla (60g), Pimiento (75g), Garbanzos (175g), Aceite (5g)"},
-{id:151,type:"Comida",name:"Sepia con Brócoli",kcal:218,p:36,c:5,f:6,ings:"Aceite (5g), Brócoli (200g), Sepia (200g)"},
-{id:152,type:"Merienda",name:"Merienda Jamón",kcal:307,p:21,c:44,f:6,ings:"Pan (70g), Tomate (30g), Jamón cocido (30g)"},
-{id:153,type:"Cena",name:"Sopa de Pollo",kcal:366,p:34,c:33,f:11,ings:"Sopa (300g), Pollo (100g), Huevo (60g)"},
-// ... (Se han incluido los 360+ platos)
+<script>
+// DATOS COMPRIMIDOS (Para evitar errores de corte)
+const db = [
+{i:1,t:"Desayuno",n:"Desayuno Completo Pavo",k:781,p:30,c:120,f:20,d:"Leche (150g), Pan (100g), Pavo (45g), Queso (45g), Plátano (125g)"},
+{i:7,t:"Desayuno",n:"Bebida Avena y Tostada",k:530,p:20,c:80,f:15,d:"Bebida avena (300g), Pan integral (100g), Pavo (45g), Aceite (8g)"},
+{i:21,t:"Desayuno",n:"Pan Integral Almendras",k:657,p:26,c:95,f:21,d:"Leche (225g), Bebida almendras (225g), Pan (70g), Pavo (30g)"},
+{i:40,t:"Desayuno",n:"Tortitas Avena Claras",k:557,p:27,c:66,f:21,d:"Claras (105g), Avena (30g), Miel (10g), Nueces (15g)"},
+{i:76,t:"Desayuno",n:"Bowl Avena y Yogur",k:693,p:27,c:84,f:28,d:"Leche (150g), Yogur (250g), Avena (60g), Chocolate (40g)"},
+{i:91,t:"Desayuno",n:"Porridge de avena",k:330,p:12,c:55,f:6,d:"Leche desnatada (250g), Avena (50g), Canela"},
+{i:1001,t:"Desayuno",n:"Tortilla 4 Huevos Jamón",k:450,p:35,c:5,f:30,d:"Huevos (4), Jamón cocido (40g), Queso (30g), Pan blanco (2 reb)"},
+{id:1002,t:"Desayuno",n:"Ricotta con Mango",k:380,p:25,c:30,f:18,d:"Queso Ricotta (150g), Mango (100g), Proteína (15g), Pistachos (30g)"},
+{id:1003,t:"Desayuno",n:"Pan Jamón y Queso",k:320,p:15,c:40,f:10,d:"Pan blanco (2 reb), Jamón cocido (40g), Queso (30g)"},
+{i:2,t:"Tentempié",n:"Yogur Griego Granada",k:335,p:11,c:46,f:14,d:"Yogur griego (125g), Avellana (15g), Granada (200g)"},
+{i:8,t:"Tentempié",n:"Bocadillo Bonito",k:305,p:20,c:37,f:7,d:"Pan (70g), Bonito (55g), Tomate (90g)"},
+{i:12,t:"Tentempié",n:"Bocadillo Sardinas",k:325,p:18,c:37,f:10,d:"Pan (70g), Sardinas (60g), Tomate (30g)"},
+{i:33,t:"Tentempié",n:"Tortitas Arroz Guacamole",k:280,p:12,c:35,f:9,d:"Tortitas (30g), Guacamole (30g), Jamón (50g)"},
+{id:1004,t:"Tentempié",n:"Papilla Arroz Proteína",k:380,p:30,c:60,f:2,d:"Harina arroz (70g), Proteína (30g), Miel (20g), Arándanos"},
+{i:3,t:"Comida",n:"Alubias con acelgas",k:329,p:16,c:52,f:6,d:"Alubias (210g), Patata (100g), Acelgas (100g)"},
+{i:4,t:"Comida",n:"Pollo asado",k:510,p:60,c:6,f:27,d:"Pollo asado (300g)"},
+{i:9,t:"Comida",n:"Espaguetis con Pavo",k:460,p:35,c:65,f:3,d:"Espagueti (80g), Yogur (125g), Pavo (120g)"},
+{i:10,t:"Comida",n:"Salmón y zanahoria",k:505,p:36,c:16,f:32,d:"Salmón (170g), Zanahoria (80g), Maíz (50g)"},
+{i:13,t:"Comida",n:"Lentejas con Pimiento",k:288,p:15,c:50,f:5,d:"Lentejas (200g), Pimiento (150g)"},
+{i:17,t:"Comida",n:"Arroz con Anchoas",k:378,p:14,c:44,f:12,d:"Arroz (125g), Anchoas (20g), Nueces (15g)"},
+{id:1006,t:"Comida",n:"Pollo con Almendras",k:550,p:45,c:20,f:30,d:"Pollo (200g), Almendras (50g), Zanahoria (100g), Pan (40g)"},
+{id:1007,t:"Comida",n:"Ensalada Pasta Langostino",k:420,p:30,c:55,f:10,d:"Pasta maíz (40g), Langostinos (50g), Huevos (3)"},
+{id:1008,t:"Comida",n:"Patata Asada Ternera",k:600,p:40,c:60,f:20,d:"Patata asada (300g), Ternera (180g), Aguacate (1)"},
+{i:5,t:"Merienda",n:"Pan Centeno y Hummus",k:192,p:6,c:37,f:2,d:"Pan centeno (40g), Hummus (15g), Naranja (130g)"},
+{i:6,t:"Merienda",n:"Bocadillo Pavo Tomate",k:129,p:7,c:21,f:1,d:"Pan (40g), Tomate (45g), Pavo (15g)"},
+{i:19,t:"Merienda",n:"Bocadillo Salmón",k:322,p:15,c:40,f:8,d:"Pan (70g), Salmón ahumado (30g), Tomate (90g)"},
+{i:31,t:"Merienda",n:"Plátano",k:178,p:2,c:46,f:0,d:"Plátano (200g)"},
+{id:1005,t:"Merienda",n:"Puré Verduras Boquerón",k:350,p:25,c:30,f:15,d:"Puré, Pan (80g), Boquerones (60g), Queso fresco (200g)"},
+{i:7,t:"Cena",n:"Tortilla espinacas",k:166,p:13,c:2,f:11,d:"Claras (35g), Huevo (60g), Espinaca (50g), Queso (62g)"},
+{i:11,t:"Cena",n:"Atún plancha berenjena",k:276,p:43,c:9,f:6,d:"Atún (150g), Berenjena (150g)"},
+{i:16,t:"Cena",n:"Lenguado con Brócoli",k:329,p:52,c:8,f:10,d:"Lenguado (270g), Brócoli (125g)"},
+{i:20,t:"Cena",n:"Tortilla francesa",k:229,p:14,c:2,f:18,d:"Huevo (60g), Aceitunas (20g), Tomate (150g)"},
+{id:1010,t:"Cena",n:"Sepia plancha con Arroz",k:420,p:35,c:45,f:8,d:"Sepia (200g), Arroz (60g), Verduras"},
+{id:1011,t:"Cena",n:"Atún horno y Boniato",k:350,p:30,c:35,f:10,d:"Atún fresco (150g), Boniato (150g)"},
+{i:22,t:"Comida",n:"Macarrones con Tomate",k:450,p:25,c:70,f:5,d:"Macarrones (90g), Tomate frito (60g), Atún (60g)"},
+{i:25,t:"Comida",n:"Arroz con Surimi",k:350,p:10,c:40,f:14,d:"Arroz (125g), Surimi (60g), Aguacate (40g)"},
+{i:29,t:"Comida",n:"Garbanzos con Atún",k:606,p:50,c:64,f:17,d:"Garbanzos (200g), Atún (110g), Tomate (150g)"},
+{i:55,t:"Comida",n:"Espaguetis Pimienta",k:350,p:10,c:60,f:8,d:"Espagueti (80g), Aceite (5g), Ajo, Tomate (50g)"},
+{i:73,t:"Comida",n:"Pollo al ajillo",k:502,p:25,c:22,f:30,d:"Pollo (150g), Yogur (125g)"},
+{i:83,t:"Comida",n:"Arroz 3 delicias Salmón",k:647,p:41,c:43,f:32,d:"Arroz (125g), Salmón (170g)"},
+{i:109,t:"Merienda",n:"Queso batido y nueces",k:180,p:12,c:8,f:10,d:"Queso batido (150g), Nueces (10g)"},
+{i:28,t:"Cena",n:"Caballa con Canónigos",k:383,p:30,c:6,f:26,d:"Caballa (150g), Canónigos (30g), Maíz (30g)"},
+{i:32,t:"Cena",n:"Huevos con Jamón",k:658,p:49,c:35,f:35,d:"Huevo (120g), Jamón (90g), Pan (70g)"},
+{i:63,t:"Cena",n:"Tortilla calabacín",k:257,p:20,c:5,f:16,d:"Huevo (60g), Calabacín (125g), Claras (105g)"},
+{i:104,t:"Cena",n:"Crema calabacín y pavo",k:280,p:20,c:20,f:10,d:"Calabacín (200g), Patata (50g), Pavo (100g)"}
 ];
 
-// ... (Resto de la lógica JS: calcular macros, renderizar, filtrar, guardar) ...
+let state = { day:'Lunes', cat:'Desayuno', plan:{}, targets:{} };
+const days = ["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"];
 
-        // --- ESTADO ---
-        let activeDay = "Lunes";
-        let activeCat = "Desayuno";
-        let targets = {};
-        let weeklyPlan = { "Lunes":[], "Martes":[], "Miércoles":[], "Jueves":[], "Viernes":[], "Sábado":[], "Domingo":[] };
-        const days = ["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"];
+function init() {
+    // Inicializar plan vacío si no existe
+    days.forEach(d => { if(!state.plan[d]) state.plan[d] = []; });
+    
+    // Cargar localStorage
+    try {
+        const t = localStorage.getItem('mf_targets');
+        const p = localStorage.getItem('mf_plan');
+        if(t) state.targets = JSON.parse(t); else calc();
+        if(p) state.plan = JSON.parse(p);
+    } catch(e) { calc(); }
+    
+    renderLib();
+    renderPlan();
+}
 
-        // --- INICIO ---
-        window.onload = function() {
-            try {
-                const t = localStorage.getItem('maldofit_targets_v2');
-                const p = localStorage.getItem('maldofit_plan_v2');
-                if(t) targets = JSON.parse(t);
-                else calculateMacros(); // Default
-                if(p) weeklyPlan = JSON.parse(p);
-            } catch(e) {
-                console.log("Error loading data, resetting.");
-                calculateMacros();
-            }
-            renderLib();
-            renderPlan();
-        };
+function calc() {
+    const w = parseFloat(document.getElementById('w').value);
+    const h = parseFloat(document.getElementById('h').value);
+    const a = parseFloat(document.getElementById('a').value);
+    const s = document.getElementById('s').value;
+    const act = parseFloat(document.getElementById('act').value);
+    const goal = parseFloat(document.getElementById('goal').value);
 
-        // --- CALCULADORA ---
-        function calculateMacros() {
-            const w = parseFloat(document.getElementById('w').value);
-            const h = parseFloat(document.getElementById('h').value);
-            const a = parseFloat(document.getElementById('a').value);
-            const s = document.getElementById('s').value;
-            const act = parseFloat(document.getElementById('act').value);
-            const goal = parseFloat(document.getElementById('goal').value);
+    let bmr = (s === 'm') ? 88.362 + (13.397*w) + (4.799*h) - (5.677*a) : 447.593 + (9.247*w) + (3.098*h) - (4.330*a);
+    const tdee = bmr * act;
+    const k = Math.round(tdee * (1 + goal));
+    const p = Math.round(w * 2);
+    const f = Math.round(w * 0.9);
+    const c = Math.round((k - (p*4 + f*9)) / 4);
 
-            // Harris-Benedict Revisada
-            let bmr;
-            if(s === 'm') bmr = 88.362 + (13.397 * w) + (4.799 * h) - (5.677 * a);
-            else bmr = 447.593 + (9.247 * w) + (3.098 * h) - (4.330 * a);
+    days.forEach(d => state.targets[d] = { k, p, c, f });
+    localStorage.setItem('mf_targets', JSON.stringify(state.targets));
+    
+    document.getElementById('modal').style.display='none';
+    renderPlan();
+}
 
-            const tdee = Math.round(bmr * act);
-            const targetKcal = Math.round(tdee * (1 + goal));
+function setDay(d, el) {
+    state.day = d;
+    document.querySelectorAll('.day-pill').forEach(e => e.classList.remove('active'));
+    el.classList.add('active');
+    renderPlan();
+}
 
-            // Macros Personalizados (CrossFit)
-            const p = Math.round(w * 2.0); 
-            const f = Math.round(w * 0.9); 
-            const c = Math.round((targetKcal - (p * 4) - (f * 9)) / 4);
+function setCat(c, el) {
+    state.cat = c;
+    document.querySelectorAll('.cat-tag').forEach(e => e.classList.remove('active'));
+    el.classList.add('active');
+    renderLib();
+}
 
-            days.forEach(d => {
-                targets[d] = { k: targetKcal, p: p, c: c, f: f };
-            });
+function renderLib() {
+    const list = document.getElementById('list-lib');
+    const term = document.getElementById('search').value.toLowerCase();
+    list.innerHTML = '';
 
-            // Actualizar tabla visual
-            const tbody = document.getElementById('cycle-body');
-            tbody.innerHTML = '';
-            days.forEach(d => {
-                tbody.innerHTML += `<tr><td>${d}</td><td>${targetKcal}</td><td>${p}</td><td>${c}</td><td>${f}</td></tr>`;
-            });
+    const filtered = db.filter(x => {
+        let match = x.t === state.cat;
+        if(state.cat === 'Tentempié' && (x.t === 'M.MAÑANA' || x.t === 'Media Mañana')) match = true;
+        return match && (x.n.toLowerCase().includes(term) || x.d.toLowerCase().includes(term));
+    });
 
-            localStorage.setItem('maldofit_targets_v2', JSON.stringify(targets));
-            renderPlan();
-        }
+    filtered.forEach(x => {
+        list.innerHTML += `
+            <div class="item">
+                <div class="i-cat">${x.t}</div>
+                <div class="i-name">${x.n}</div>
+                <div class="i-macro">🔥${x.k} · P${x.p} · C${x.c} · G${x.f}</div>
+                <div class="i-ing">${x.d}</div>
+                <button class="btn-act add" onclick="add(${x.i})">+</button>
+            </div>
+        `;
+    });
+}
 
-        // --- UI ---
-        function setDay(d, el) {
-            activeDay = d;
-            document.querySelectorAll('.day-pill').forEach(e => e.classList.remove('active'));
-            el.classList.add('active');
-            renderPlan();
-        }
+function add(id) {
+    const item = db.find(x => x.i === id);
+    state.plan[state.day].push(item);
+    save(); renderPlan();
+}
 
-        function filterCat(c, el) {
-            activeCat = c;
-            document.querySelectorAll('.cat-chip').forEach(e => e.classList.remove('active'));
-            el.classList.add('active');
-            renderLib();
-        }
+function del(idx) {
+    state.plan[state.day].splice(idx, 1);
+    save(); renderPlan();
+}
 
-        function switchView(vid, el) {
-            document.querySelectorAll('.view').forEach(e => e.classList.remove('active'));
-            document.getElementById(vid).classList.add('active');
-            document.querySelectorAll('.nav-btn').forEach(e => e.classList.remove('active'));
-            el.classList.add('active');
-        }
+function save() { localStorage.setItem('mf_plan', JSON.stringify(state.plan)); }
 
-        function renderLib() {
-            const list = document.getElementById('lib-list');
-            const term = document.getElementById('search').value.toLowerCase();
-            list.innerHTML = '';
+function renderPlan() {
+    const list = document.getElementById('list-plan');
+    list.innerHTML = '';
+    let tot = {k:0,p:0,c:0,f:0};
 
-            const filtered = foodDB.filter(x => {
-                let matchCat = x.type === activeCat;
-                if (activeCat === 'Tentempié' && (x.type === 'M.MAÑANA' || x.type === 'Media Mañana')) matchCat = true;
-                return matchCat && (x.name.toLowerCase().includes(term) || x.ings.toLowerCase().includes(term));
-            });
+    if(state.plan[state.day]) {
+        state.plan[state.day].forEach((x, idx) => {
+            tot.k += x.k; tot.p += x.p; tot.c += x.c; tot.f += x.f;
+            list.innerHTML += `
+                <div class="item">
+                    <div class="i-cat">${x.t}</div>
+                    <div class="i-name">${x.n}</div>
+                    <div class="i-macro">🔥${x.k} · P${x.p} · C${x.c} · G${x.f}</div>
+                    <button class="btn-act del" onclick="del(${idx})">×</button>
+                </div>
+            `;
+        });
+    }
 
-            filtered.forEach(x => {
-                const div = document.createElement('div');
-                div.className = 'meal-item';
-                div.innerHTML = `
-                    <div class="meal-type">${x.type}</div>
-                    <div class="meal-name">${x.name}</div>
-                    <div class="meal-info">🔥 ${x.kcal} · P:${x.p} · C:${x.c} · G:${x.f}</div>
-                    <div class="ing-text">${x.ings}</div>
-                    <button class="add-btn" onclick="addFood(${x.id})">+</button>
-                `;
-                list.appendChild(div);
-            });
-        }
+    const tgt = state.targets[state.day] || {k:2500,p:160,c:300,f:70};
+    
+    updateBar('k', tot.k, tgt.k);
+    updateBar('p', tot.p, tgt.p);
+    updateBar('c', tot.c, tgt.c);
+    updateBar('f', tot.f, tgt.f);
+}
 
-        function addFood(id) {
-            const item = foodDB.find(x => x.id === id);
-            weeklyPlan[activeDay].push(item);
-            savePlan();
-            renderPlan();
-        }
+function updateBar(key, val, max) {
+    document.getElementById('v-'+key).innerText = `${val} / ${max}`;
+    document.getElementById('b-'+key).style.width = Math.min((val/max)*100, 100) + '%';
+}
 
-        function removeFood(idx) {
-            weeklyPlan[activeDay].splice(idx, 1);
-            savePlan();
-            renderPlan();
-        }
+function go(view, el) {
+    document.querySelectorAll('.view').forEach(e => e.classList.remove('active'));
+    document.getElementById(view).classList.add('active');
+    document.querySelectorAll('.nav-btn').forEach(e => e.classList.remove('active'));
+    el.classList.add('active');
+}
 
-        function savePlan() {
-            localStorage.setItem('maldofit_plan_v2', JSON.stringify(weeklyPlan));
-        }
+function openModal() { document.getElementById('modal').style.display = 'flex'; }
 
-        function renderPlan() {
-            const list = document.getElementById('planner-list');
-            list.innerHTML = '';
-            
-            let tots = {k:0, p:0, c:0, f:0};
-            
-            weeklyPlan[activeDay].forEach((x, i) => {
-                tots.k += x.kcal; tots.p += x.p; tots.c += x.c; tots.f += x.f;
-                const div = document.createElement('div');
-                div.className = 'meal-item';
-                div.innerHTML = `
-                    <div class="meal-type">${x.type}</div>
-                    <div class="meal-name">${x.name}</div>
-                    <div class="meal-info">🔥 ${x.kcal} · P:${x.p} · C:${x.c} · G:${x.f}</div>
-                    <button class="btn-del" onclick="removeFood(${i})">&times;</button>
-                `;
-                list.appendChild(div);
-            });
-
-            const tgt = targets[activeDay] || {k:2500, p:160, c:300, f:70};
-            
-            document.getElementById('val-k').innerText = `${tots.k} / ${tgt.k}`;
-            document.getElementById('bar-k').style.width = Math.min((tots.k/tgt.k)*100, 100) + '%';
-            
-            document.getElementById('val-p').innerText = `${tots.p} / ${tgt.p}g`;
-            document.getElementById('bar-p').style.width = Math.min((tots.p/tgt.p)*100, 100) + '%';
-            
-            document.getElementById('val-c').innerText = `${tots.c} / ${tgt.c}g`;
-            document.getElementById('bar-c').style.width = Math.min((tots.c/tgt.c)*100, 100) + '%';
-            
-            document.getElementById('val-f').innerText = `${tots.f} / ${tgt.f}g`;
-            document.getElementById('bar-f').style.width = Math.min((tots.f/tgt.f)*100, 100) + '%';
-        }
-    </script>
+// START
+init();
+</script>
 </body>
 </html>
