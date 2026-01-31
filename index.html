@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>MaldoFit Pro v5.1</title>
+<title>MaldoFit Pro v5.2</title>
 
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
@@ -14,17 +14,7 @@
 
 <style>
     /* --- DISEÑO GLASS DARK --- */
-    :root { 
-        --bg: #000000; 
-        --surface: #121212; 
-        --text: #ffffff; 
-        --sub: #888888; 
-        --accent: #b0fb5d; 
-        --bad: #ff4b4b; --warn: #ffb700; --ok: #b0fb5d;
-        --border: #222; 
-        --radius: 16px;
-    }
-    
+    :root { --bg: #000000; --surface: #121212; --text: #ffffff; --sub: #888; --accent: #b0fb5d; --bad: #ff4b4b; --warn: #ffb700; --ok: #b0fb5d; --border: #222; --radius: 16px; }
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
     body { background:var(--bg); color:var(--text); margin:0; padding-bottom:120px; user-select:none; -webkit-font-smoothing: antialiased; overscroll-behavior-y: none; }
     
@@ -49,50 +39,50 @@
     .list { padding:20px; min-height:300px; padding-bottom:100px; }
     .item { background: var(--surface); border-radius: var(--radius); padding: 18px; margin-bottom: 12px; position: relative; animation: fadeIn 0.3s; border: 1px solid #1a1a1a; }
     .i-cat { font-size:9px; font-weight:800; color:var(--accent); text-transform:uppercase; margin-bottom:6px; letter-spacing:1px; opacity:0.8; }
-    .i-name { font-size:16px; font-weight:600; margin-bottom:6px; padding-right:30px; line-height:1.3; }
+    .i-name { font-size:16px; font-weight:600; margin-bottom:6px; padding-right:45px; line-height:1.3; }
     .i-det { font-size:12px; color:var(--sub); font-family: 'SF Mono', monospace; }
     .i-ing { font-size:13px; color:#aaa; margin-top:12px; padding-top:12px; border-top:1px solid #222; line-height:1.5; display:none; }
     .item.expanded .i-ing { display:block; animation:slideDown 0.2s; }
     
-    /* BOTONES ACCION LISTA */
+    /* BOTONES LISTA */
     .del { position:absolute; top:15px; right:15px; background:transparent; border:none; color:var(--sub); opacity:0.5; width:30px; height:30px; display:flex; align-items:center; justify-content:center; font-size:16px; }
     
-    /* Botón añadir en lista (verde) */
-    .add-btn { background:var(--ok); color:#000; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; position:absolute; top:15px; right:15px; font-weight:bold; font-size: 18px; z-index: 5; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+    /* Botón AÑADIR (Verde) */
+    .add-btn { background:var(--ok); color:#000; width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; position:absolute; top:12px; right:12px; font-weight:bold; font-size: 20px; z-index: 5; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
     
-    /* Botón borrar en librería (rojo) */
-    .del-lib { background:rgba(255, 75, 75, 0.15); color:var(--bad); width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; position:absolute; top:17px; right:55px; font-size: 14px; border:1px solid var(--bad); cursor: pointer; z-index: 5; }
-    
-    /* DOCK (BARRA INFERIOR) */
+    /* Botón PAPELERA (Rojo - Nube) - ESTILO CORREGIDO */
+    .del-lib { 
+        background: #2a0000; 
+        color: #ff4b4b; 
+        width: 36px; height: 36px; 
+        border-radius: 50%; 
+        display: flex; align-items: center; justify-content: center; 
+        position: absolute; top: 12px; right: 58px; /* Separado del verde */
+        font-size: 16px; 
+        border: 1px solid #ff4b4b; 
+        cursor: pointer; 
+        z-index: 5; 
+    }
+
+    /* DOCK */
     .nav-container { position: fixed; bottom: 25px; left: 0; width: 100%; display: flex; justify-content: center; z-index: 9999; pointer-events: none; padding-bottom: env(safe-area-inset-bottom); }
     .nav { background: rgba(20,20,20,0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 12px 30px; border-radius: 100px; display: flex; gap: 40px; box-shadow: 0 10px 40px rgba(0,0,0,0.8); border: 1px solid #333; pointer-events: auto; }
     .n-item { color:#555; background:none; border:none; transition:0.3s; cursor: pointer; font-size: 24px; display: flex; align-items: center; justify-content: center; padding: 0; }
     .n-item.active { filter: drop-shadow(0 0 5px var(--accent)); transform: scale(1.1); }
 
-    /* MODALS */
+    /* MODALS & INPUTS */
     #modal, #lib, #archive-view, #creator { display:none; position:fixed; inset:0; background:var(--bg); z-index:200; overflow-y:auto; padding-top:calc(env(safe-area-inset-top) + 20px); animation: fadeIn 0.2s; }
     .m-box { padding:20px; max-width:500px; margin:0 auto; padding-bottom:80px; }
-    
-    /* SEARCH & INPUTS */
     .search-container { position:sticky; top:0; background:var(--bg); z-index:10; padding:20px; border-bottom:1px solid var(--border); display:flex; gap:10px; align-items: center; }
     .search { flex: 1; padding:14px 18px; background:var(--surface); border:1px solid #333; color:#fff; font-size:16px; border-radius:12px; outline:none; }
-    
-    /* BOTÓN CREAR (+) */
     .create-btn { background: var(--surface); border: 1px solid #333; color: var(--accent); width: 50px; height: 50px; border-radius: 12px; font-size: 28px; font-weight: 300; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; flex-shrink: 0; }
-    .create-btn:active { background: #222; transform: scale(0.95); }
-    
     .wk-inp { width:100%; padding:12px; background:var(--surface); border:1px solid #333; color:#fff; font-size:14px; border-radius:8px; outline:none; margin-bottom:10px; }
     .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
     .grid-wk { display:grid; gap:8px; margin-top:15px; }
     .wk-row { display:grid; grid-template-columns:40px 1fr 1fr 1fr 1fr; gap:6px; align-items:center; padding:5px; border-radius:8px; background:#0a0a0a; }
     .mini-inp { width:100%; background:transparent; border:none; color:#fff; text-align:center; font-size:13px; font-weight:600; outline:none; padding:8px 0; }
-    
-    /* SCANNER BTN */
     .scan-btn { width:100%; margin-bottom:20px; padding:15px; background:linear-gradient(45deg, #222, #333); border:1px solid #444; border-radius:12px; color:var(--accent); font-weight:bold; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; font-size:14px; }
-    .scan-btn:active { transform:scale(0.98); }
     #scan-status { font-size:12px; color:var(--accent); text-align:center; margin-bottom:10px; display:none; }
-
-    /* ARCHIVE */
     .arch-card { background:var(--surface); padding:15px; border-radius:12px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; border:1px solid #222; }
     .arch-info h3 { margin:0; font-size:15px; } .arch-info p { margin:5px 0 0; color:var(--sub); font-size:12px; }
 
@@ -140,16 +130,13 @@
             <h2 style="color:var(--accent); margin:0;">Nuevo Alimento</h2>
             <button onclick="document.getElementById('creator').style.display='none'" class="icon-btn">✕</button>
         </div>
-
         <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none" onchange="processImage(this)">
         <button class="scan-btn" onclick="document.getElementById('cameraInput').click()">
             <span style="font-size:18px">📷</span> ESCANEAR ETIQUETA (IA)
         </button>
         <div id="scan-status">⏳ Analizando...</div>
-        
         <label style="color:#fff; font-size:12px; font-weight:bold;">NOMBRE</label>
         <input type="text" id="new-name" class="wk-inp" placeholder="Ej: Pan con Jamón">
-        
         <div class="form-grid" style="margin-top:15px;">
             <div><label style="color:var(--bad); font-size:12px; font-weight:bold;">PROTEÍNA</label><input type="number" id="new-p" class="wk-inp" placeholder="0" oninput="autoCalcKcal()"></div>
             <div><label style="color:var(--warn); font-size:12px; font-weight:bold;">CARBOS</label><input type="number" id="new-c" class="wk-inp" placeholder="0" oninput="autoCalcKcal()"></div>
@@ -158,18 +145,13 @@
             <div><label style="color:var(--ok); font-size:12px; font-weight:bold;">GRASAS</label><input type="number" id="new-f" class="wk-inp" placeholder="0" oninput="autoCalcKcal()"></div>
             <div><label style="color:#fff; font-size:12px; font-weight:bold;">KCAL (Auto)</label><input type="number" id="new-k" class="wk-inp" placeholder="0" readonly style="background:#111; color:#888;"></div>
         </div>
-        
         <label style="color:#fff; font-size:12px; font-weight:bold;">INGREDIENTES (Opcional)</label>
         <input type="text" id="new-ing" class="wk-inp" placeholder="Ej: 50g pan...">
-
         <button onclick="saveCustomFood()" style="width:100%; padding:15px; background:var(--accent); color:#000; border:none; border-radius:12px; font-weight:bold; margin-top:10px;">GUARDAR EN NUBE</button>
     </div>
 </div>
 
-<div id="archive-view">
-    <div class="header"><h1>Mis Dietas</h1><button onclick="document.getElementById('archive-view').style.display='none'" class="icon-btn">✕</button></div>
-    <div class="list" id="archive-list"></div>
-</div>
+<div id="archive-view"><div class="header"><h1>Mis Dietas</h1><button onclick="document.getElementById('archive-view').style.display='none'" class="icon-btn">✕</button></div><div class="list" id="archive-list"></div></div>
 
 <div id="modal">
     <div class="m-box">
@@ -231,25 +213,20 @@
         renderLib();
     }
 
-    // --- BORRAR DE LA NUBE ---
+    // --- BORRADO NUBE (FIXED) ---
     window.deleteFromCloud = async (id, e) => {
         e.stopPropagation();
-        if(!confirm("⚠️ ¿Borrar este plato de la base de datos (NUBE)? Desaparecerá para siempre.")) return;
-        
-        // Identificar ID del documento (los custom son timestamp, los originales p+id)
+        if(!confirm("⚠️ ¿Borrar de la base de datos? (Irreversible)")) return;
         let docId = (id > 1000000000) ? "c_" + id : "p" + id;
-
         try {
             await db.collection("comidas").doc(docId).delete();
-            foodDB = foodDB.filter(x => x.id !== id); // Quitar localmente
+            foodDB = foodDB.filter(x => x.id !== id);
             renderLib();
-            alert("🗑️ Plato eliminado.");
-        } catch(e) {
-            alert("Error (¿Tienes permisos de escritura?): " + e.message);
-        }
+            alert("🗑️ Eliminado");
+        } catch(e) { alert("Error: " + e.message); }
     }
 
-    // --- IA & CREACIÓN ---
+    // --- IA & CREACIÓN (FIXED KJ) ---
     window.openCreator = () => { document.getElementById('creator').style.display='block'; }
     window.autoCalcKcal = () => {
         const p = parseFloat(document.getElementById('new-p').value)||0, c = parseFloat(document.getElementById('new-c').value)||0, f = parseFloat(document.getElementById('new-f').value)||0;
@@ -272,19 +249,26 @@
                 return match ? parseFloat(match[2].replace(',','.')) : 0;
             };
 
-            const p = find(['protein','proteina']), c = find(['carb','hidratos']), f = find(['fat','grasa']), k = find(['kcal','energy']);
+            const p = find(['protein','proteina']), c = find(['carb','hidratos']), f = find(['fat','grasa']), k = find(['kcal','energy','valor']);
 
             if(p) document.getElementById('new-p').value = p;
             if(c) document.getElementById('new-c').value = c;
             if(f) document.getElementById('new-f').value = f;
             
-            // CORRECCIÓN: Si no encuentra Kcal o son 0, calcula por fórmula
-            setTimeout(() => {
-                if(k > 0) document.getElementById('new-k').value = k;
-                else autoCalcKcal(); // Forzar cálculo matemático
-            }, 100);
+            // --- FIX INTELIGENTE KJ vs KCAL ---
+            const mathKcal = Math.round((p*4) + (c*4) + (f*9));
+            if (k > 0) {
+                // Si el valor detectado es > 2 veces la matemática, seguramente son kJ
+                if (mathKcal > 0 && k > (mathKcal * 2)) {
+                    document.getElementById('new-k').value = Math.round(k / 4.184); // Convertir kJ
+                } else {
+                    document.getElementById('new-k').value = k; // Usar valor detectado si es razonable
+                }
+            } else {
+                autoCalcKcal(); // Usar matemáticas si no lee nada
+            }
 
-            status.innerHTML = "✅ ¡Datos extraídos!"; status.style.animation = "none";
+            status.innerHTML = "✅ ¡Leído!"; status.style.animation = "none";
             await worker.terminate();
         } catch (e) { status.innerHTML = "❌ Error lectura."; }
     }
@@ -293,17 +277,12 @@
         const name = document.getElementById('new-name').value;
         const p = parseFloat(document.getElementById('new-p').value)||0, c = parseFloat(document.getElementById('new-c').value)||0, f = parseFloat(document.getElementById('new-f').value)||0, k = parseInt(document.getElementById('new-k').value)||0;
         const ing = document.getElementById('new-ing').value || "Personalizado";
-
         if(!name) { alert("Pon un nombre"); return; }
         const newItem = { id: Date.now(), name: name, type: state.cat, p: p, c: c, f: f, kcal: k, ings: ing };
-
         try {
             await db.collection("comidas").doc("c_" + newItem.id).set(newItem);
-            foodDB.push(newItem);
-            renderLib();
-            document.getElementById('creator').style.display='none';
-            document.getElementById('new-name').value = "";
-            alert("✅ Guardado");
+            foodDB.push(newItem); renderLib(); document.getElementById('creator').style.display='none';
+            document.getElementById('new-name').value = ""; alert("✅ Guardado");
         } catch(e) { alert("Error: " + e.message); }
     }
 
@@ -365,7 +344,13 @@
             let m = x.type === state.cat; if(state.cat==='Tentempié' && (x.type.includes('Mañana')||x.type.includes('M.MAÑANA'))) m=true;
             return m && (x.name.toLowerCase().includes(s) || x.ings.toLowerCase().includes(s));
         }).forEach(x => {
-            l.innerHTML += `<div class="item" onclick="this.classList.toggle('expanded')"><div class="i-name">${x.name}</div><div class="i-det">🔥${x.kcal} <span style="color:var(--bad)">P${x.p}</span> <span style="color:var(--warn)">C${x.c}</span> <span style="color:var(--ok)">F${x.f}</span></div><div class="i-ing">${x.ings}</div><button class="add-btn" onclick="add(${x.id}, event)">+</button><button class="del-lib" onclick="deleteFromCloud(${x.id}, event)">🗑️</button></div>`;
+            l.innerHTML += `<div class="item" onclick="this.classList.toggle('expanded')">
+            <div class="i-name">${x.name}</div>
+            <div class="i-det">🔥${x.kcal} <span style="color:var(--bad)">P${x.p}</span> <span style="color:var(--warn)">C${x.c}</span> <span style="color:var(--ok)">F${x.f}</span></div>
+            <div class="i-ing">${x.ings}</div>
+            <button class="add-btn" onclick="add(${x.id}, event)">+</button>
+            <button class="del-lib" onclick="deleteFromCloud(${x.id}, event)">🗑️</button>
+            </div>`;
         });
     }
 
