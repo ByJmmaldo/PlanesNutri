@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>MaldoFit Pro v5.0 IA</title>
+<title>MaldoFit Pro v5.1</title>
 
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
@@ -54,8 +54,14 @@
     .i-ing { font-size:13px; color:#aaa; margin-top:12px; padding-top:12px; border-top:1px solid #222; line-height:1.5; display:none; }
     .item.expanded .i-ing { display:block; animation:slideDown 0.2s; }
     
+    /* BOTONES ACCION LISTA */
     .del { position:absolute; top:15px; right:15px; background:transparent; border:none; color:var(--sub); opacity:0.5; width:30px; height:30px; display:flex; align-items:center; justify-content:center; font-size:16px; }
-    .add-btn { background:var(--ok); color:#000; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; position:absolute; top:15px; right:15px; font-weight:bold; font-size: 18px; }
+    
+    /* Botón añadir en lista (verde) */
+    .add-btn { background:var(--ok); color:#000; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; position:absolute; top:15px; right:15px; font-weight:bold; font-size: 18px; z-index: 5; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+    
+    /* Botón borrar en librería (rojo) */
+    .del-lib { background:rgba(255, 75, 75, 0.15); color:var(--bad); width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; position:absolute; top:17px; right:55px; font-size: 14px; border:1px solid var(--bad); cursor: pointer; z-index: 5; }
     
     /* DOCK (BARRA INFERIOR) */
     .nav-container { position: fixed; bottom: 25px; left: 0; width: 100%; display: flex; justify-content: center; z-index: 9999; pointer-events: none; padding-bottom: env(safe-area-inset-bottom); }
@@ -136,38 +142,25 @@
         </div>
 
         <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none" onchange="processImage(this)">
-        
         <button class="scan-btn" onclick="document.getElementById('cameraInput').click()">
             <span style="font-size:18px">📷</span> ESCANEAR ETIQUETA (IA)
         </button>
-        <div id="scan-status">⏳ Analizando etiqueta... espera un momento...</div>
+        <div id="scan-status">⏳ Analizando...</div>
         
         <label style="color:#fff; font-size:12px; font-weight:bold;">NOMBRE</label>
         <input type="text" id="new-name" class="wk-inp" placeholder="Ej: Pan con Jamón">
         
         <div class="form-grid" style="margin-top:15px;">
-            <div>
-                <label style="color:var(--bad); font-size:12px; font-weight:bold;">PROTEÍNA (g)</label>
-                <input type="number" id="new-p" class="wk-inp" placeholder="0" oninput="autoCalcKcal()">
-            </div>
-            <div>
-                <label style="color:var(--warn); font-size:12px; font-weight:bold;">CARBOS (g)</label>
-                <input type="number" id="new-c" class="wk-inp" placeholder="0" oninput="autoCalcKcal()">
-            </div>
+            <div><label style="color:var(--bad); font-size:12px; font-weight:bold;">PROTEÍNA</label><input type="number" id="new-p" class="wk-inp" placeholder="0" oninput="autoCalcKcal()"></div>
+            <div><label style="color:var(--warn); font-size:12px; font-weight:bold;">CARBOS</label><input type="number" id="new-c" class="wk-inp" placeholder="0" oninput="autoCalcKcal()"></div>
         </div>
         <div class="form-grid">
-            <div>
-                <label style="color:var(--ok); font-size:12px; font-weight:bold;">GRASAS (g)</label>
-                <input type="number" id="new-f" class="wk-inp" placeholder="0" oninput="autoCalcKcal()">
-            </div>
-            <div>
-                <label style="color:#fff; font-size:12px; font-weight:bold;">KCAL (Auto)</label>
-                <input type="number" id="new-k" class="wk-inp" placeholder="0" readonly style="background:#111; color:#888;">
-            </div>
+            <div><label style="color:var(--ok); font-size:12px; font-weight:bold;">GRASAS</label><input type="number" id="new-f" class="wk-inp" placeholder="0" oninput="autoCalcKcal()"></div>
+            <div><label style="color:#fff; font-size:12px; font-weight:bold;">KCAL (Auto)</label><input type="number" id="new-k" class="wk-inp" placeholder="0" readonly style="background:#111; color:#888;"></div>
         </div>
         
         <label style="color:#fff; font-size:12px; font-weight:bold;">INGREDIENTES (Opcional)</label>
-        <input type="text" id="new-ing" class="wk-inp" placeholder="Ej: 50g pan, 30g jamón...">
+        <input type="text" id="new-ing" class="wk-inp" placeholder="Ej: 50g pan...">
 
         <button onclick="saveCustomFood()" style="width:100%; padding:15px; background:var(--accent); color:#000; border:none; border-radius:12px; font-weight:bold; margin-top:10px;">GUARDAR EN NUBE</button>
     </div>
@@ -190,51 +183,21 @@
                 <input type="number" id="h" class="wk-inp" value="180" placeholder="Cm">
             </div>
             <div style="display:grid; grid-template-columns: 2fr 1fr; gap:10px; margin-bottom:10px;">
-                <select id="act" class="wk-inp">
-                    <option value="1.2">Sedentario</option>
-                    <option value="1.375">Ligero</option>
-                    <option value="1.55" selected>Moderado</option>
-                    <option value="1.725">Intenso</option>
-                </select>
-                <select id="target-day" class="wk-inp" style="background:#222; border-color:#444; color:var(--accent); font-weight:bold;">
-                    <option value="all">Todo</option>
-                    <option value="Lunes">Lun</option>
-                    <option value="Martes">Mar</option>
-                    <option value="Miércoles">Mié</option>
-                    <option value="Jueves">Jue</option>
-                    <option value="Viernes">Vie</option>
-                    <option value="Sábado">Sáb</option>
-                    <option value="Domingo">Dom</option>
-                </select>
+                <select id="act" class="wk-inp"><option value="1.2">Sedentario</option><option value="1.375">Ligero</option><option value="1.55" selected>Moderado</option><option value="1.725">Intenso</option></select>
+                <select id="target-day" class="wk-inp" style="background:#222; border-color:#444; color:var(--accent); font-weight:bold;"><option value="all">Todo</option><option value="Lunes">Lun</option><option value="Martes">Mar</option><option value="Miércoles">Mié</option><option value="Jueves">Jue</option><option value="Viernes">Vie</option><option value="Sábado">Sáb</option><option value="Domingo">Dom</option></select>
             </div>
-            <select id="goal" class="wk-inp" style="border-color:var(--accent);">
-                <option value="-0.25">Definición Agresiva (-25%)</option>
-                <option value="-0.15">Definición Lenta (-15%)</option>
-                <option value="0">Mantenimiento</option>
-                <option value="0.15">Volumen Limpio (+15%)</option>
-                <option value="0.20">Volumen Agresivo (+20%)</option>
-            </select>
+            <select id="goal" class="wk-inp" style="border-color:var(--accent);"><option value="-0.25">Definición Agresiva (-25%)</option><option value="-0.15">Definición Lenta (-15%)</option><option value="0">Mantenimiento</option><option value="0.15">Volumen Limpio (+15%)</option><option value="0.20">Volumen Agresivo (+20%)</option></select>
             <button onclick="calcAuto()" style="width:100%; padding:12px; background:var(--text); color:#000; border:none; border-radius:10px; font-weight:bold;">CALCULAR</button>
         </div>
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-            <h3 style="margin:0; font-size:14px; color:#fff;">Ajuste Manual</h3>
-            <div style="background:#222; border-radius:20px; padding:3px;"><button id="mode-g" class="icon-btn" style="border-radius:15px; font-size:10px; padding:5px 12px;" onclick="setMode('g')">G</button><button id="mode-p" class="icon-btn" style="border-radius:15px; font-size:10px; padding:5px 12px;" onclick="setMode('p')">%</button></div>
-        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center;"><h3 style="margin:0; font-size:14px; color:#fff;">Ajuste Manual</h3><div style="background:#222; border-radius:20px; padding:3px;"><button id="mode-g" class="icon-btn" style="border-radius:15px; font-size:10px; padding:5px 12px;" onclick="setMode('g')">G</button><button id="mode-p" class="icon-btn" style="border-radius:15px; font-size:10px; padding:5px 12px;" onclick="setMode('p')">%</button></div></div>
         <div id="grid-wk" class="grid-wk"></div>
         <button onclick="saveConfig()" style="width:100%; padding:15px; background:var(--accent); color:#000; border:none; border-radius:12px; font-weight:bold; margin-top:20px;">GUARDAR</button>
     </div>
 </div>
 
-<div class="nav-container">
-    <div class="nav">
-        <button class="n-item active" onclick="switchView('app')">📋</button>
-        <button class="n-item" onclick="document.getElementById('lib').style.display='block'">➕</button>
-        <button class="n-item" onclick="openArchive()">📂</button>
-    </div>
-</div>
+<div class="nav-container"><div class="nav"><button class="n-item active" onclick="switchView('app')">📋</button><button class="n-item" onclick="document.getElementById('lib').style.display='block'">➕</button><button class="n-item" onclick="openArchive()">📂</button></div></div>
 
 <script>
-    // 🔴 CREDENCIALES
     const firebaseConfig = {
       apiKey: "AIzaSyDTPiVRMpYkP3HZXcoGpWmPvcmReKE_Jv4",
       authDomain: "nutriapp-ec26e.firebaseapp.com",
@@ -249,18 +212,11 @@
     const CATS = ["Desayuno","Tentempié","Comida","Merienda","Cena"];
 
     function init() {
-        try {
-            firebase.initializeApp(firebaseConfig);
-            db = firebase.firestore();
-            loadData(); 
-        } catch(e) { console.error(e); }
-
+        try { firebase.initializeApp(firebaseConfig); db = firebase.firestore(); loadData(); } catch(e) { console.error(e); }
         DAYS.forEach(d=>{ if(!state.plan[d]) state.plan[d]=[]; });
-        const t = localStorage.getItem('mf_targets_v6');
-        const p = localStorage.getItem('mf_plan');
+        const t = localStorage.getItem('mf_targets_v6'), p = localStorage.getItem('mf_plan');
         if(t) state.targets = JSON.parse(t); else calcAuto(true);
         if(p) state.plan = JSON.parse(p);
-
         renderDays(); renderCats(); renderPlan();
         if(state.targets) renderGrid();
         setMode('g');
@@ -275,83 +231,71 @@
         renderLib();
     }
 
-    // --- CREADOR & OCR (IA VISION) ---
+    // --- BORRAR DE LA NUBE ---
+    window.deleteFromCloud = async (id, e) => {
+        e.stopPropagation();
+        if(!confirm("⚠️ ¿Borrar este plato de la base de datos (NUBE)? Desaparecerá para siempre.")) return;
+        
+        // Identificar ID del documento (los custom son timestamp, los originales p+id)
+        let docId = (id > 1000000000) ? "c_" + id : "p" + id;
+
+        try {
+            await db.collection("comidas").doc(docId).delete();
+            foodDB = foodDB.filter(x => x.id !== id); // Quitar localmente
+            renderLib();
+            alert("🗑️ Plato eliminado.");
+        } catch(e) {
+            alert("Error (¿Tienes permisos de escritura?): " + e.message);
+        }
+    }
+
+    // --- IA & CREACIÓN ---
     window.openCreator = () => { document.getElementById('creator').style.display='block'; }
     window.autoCalcKcal = () => {
-        const p = parseFloat(document.getElementById('new-p').value) || 0;
-        const c = parseFloat(document.getElementById('new-c').value) || 0;
-        const f = parseFloat(document.getElementById('new-f').value) || 0;
+        const p = parseFloat(document.getElementById('new-p').value)||0, c = parseFloat(document.getElementById('new-c').value)||0, f = parseFloat(document.getElementById('new-f').value)||0;
         document.getElementById('new-k').value = Math.round((p*4) + (c*4) + (f*9));
     }
 
-    // LÓGICA DE RECONOCIMIENTO
     window.processImage = async (input) => {
-        const file = input.files[0];
-        if(!file) return;
-        
+        const file = input.files[0]; if(!file) return;
         const status = document.getElementById('scan-status');
-        status.style.display = "block";
-        status.style.animation = "pulse 1s infinite";
+        status.style.display = "block"; status.style.animation = "pulse 1s infinite";
         
         try {
-            // Inicializar Worker
-            const worker = await Tesseract.createWorker('eng'); // Usamos inglés por precisión numérica
+            const worker = await Tesseract.createWorker('eng');
             const ret = await worker.recognize(file);
             const text = ret.data.text.toLowerCase();
             
-            console.log("Texto detectado:", text); // Para depuración
-            
-            // Regex para buscar patrones (Busca número cerca de palabras clave)
-            // Ejemplo: Busca "fat" o "grasas" seguido de digitos
-            const findValue = (keywords) => {
-                // Regex: Palabra clave + (cualquier cosa) + digitos + (g/ml)
-                const regex = new RegExp(`(${keywords.join('|')})[^0-9]*([0-9]+[.,]?[0-9]*)`, 'i');
+            const find = (keys) => {
+                const regex = new RegExp(`(${keys.join('|')})[^0-9]*([0-9]+[.,]?[0-9]*)`, 'i');
                 const match = text.match(regex);
                 return match ? parseFloat(match[2].replace(',','.')) : 0;
             };
 
-            // Extracción inteligente
-            const p = findValue(['protein', 'proteina', 'proteinas']);
-            const c = findValue(['carb', 'hidratos', 'carbohydrate']);
-            const f = findValue(['fat', 'grasa', 'grasas', 'lipidos']);
-            const k = findValue(['kcal', 'energy', 'energetico', 'energia']);
+            const p = find(['protein','proteina']), c = find(['carb','hidratos']), f = find(['fat','grasa']), k = find(['kcal','energy']);
 
-            // Rellenar inputs
             if(p) document.getElementById('new-p').value = p;
             if(c) document.getElementById('new-c').value = c;
             if(f) document.getElementById('new-f').value = f;
             
-            // Si detecta kcal las pone, si no, calcula
-            if(k > 0) document.getElementById('new-k').value = k;
-            else window.autoCalcKcal();
+            // CORRECCIÓN: Si no encuentra Kcal o son 0, calcula por fórmula
+            setTimeout(() => {
+                if(k > 0) document.getElementById('new-k').value = k;
+                else autoCalcKcal(); // Forzar cálculo matemático
+            }, 100);
 
-            status.innerHTML = "✅ ¡Datos extraídos! Revisa por si acaso.";
-            status.style.animation = "none";
+            status.innerHTML = "✅ ¡Datos extraídos!"; status.style.animation = "none";
             await worker.terminate();
-
-        } catch (e) {
-            status.innerHTML = "❌ Error al leer. Intenta con mejor luz.";
-            console.error(e);
-        }
+        } catch (e) { status.innerHTML = "❌ Error lectura."; }
     }
 
     window.saveCustomFood = async () => {
         const name = document.getElementById('new-name').value;
-        const p = parseFloat(document.getElementById('new-p').value) || 0;
-        const c = parseFloat(document.getElementById('new-c').value) || 0;
-        const f = parseFloat(document.getElementById('new-f').value) || 0;
-        const k = parseInt(document.getElementById('new-k').value) || 0;
+        const p = parseFloat(document.getElementById('new-p').value)||0, c = parseFloat(document.getElementById('new-c').value)||0, f = parseFloat(document.getElementById('new-f').value)||0, k = parseInt(document.getElementById('new-k').value)||0;
         const ing = document.getElementById('new-ing').value || "Personalizado";
 
         if(!name) { alert("Pon un nombre"); return; }
-
-        const newItem = {
-            id: Date.now(),
-            name: name,
-            type: state.cat,
-            p: p, c: c, f: f, kcal: k,
-            ings: ing
-        };
+        const newItem = { id: Date.now(), name: name, type: state.cat, p: p, c: c, f: f, kcal: k, ings: ing };
 
         try {
             await db.collection("comidas").doc("c_" + newItem.id).set(newItem);
@@ -360,75 +304,39 @@
             document.getElementById('creator').style.display='none';
             document.getElementById('new-name').value = "";
             alert("✅ Guardado");
-        } catch(e) {
-            alert("Error: " + e.message);
-        }
+        } catch(e) { alert("Error: " + e.message); }
     }
 
-    // --- FUNCIONES CORE ---
+    // --- CORE ---
     window.saveToArchive = function() {
-        const name = prompt("Nombre del plan:");
-        if(!name) return;
+        const name = prompt("Nombre:"); if(!name) return;
         const item = { id: Date.now(), name: name, date: new Date().toLocaleDateString(), plan: state.plan, targets: state.targets };
         let archive = JSON.parse(localStorage.getItem('mf_archive') || "[]");
         archive.push(item);
         localStorage.setItem('mf_archive', JSON.stringify(archive));
         alert("Guardado");
     }
-
     window.openArchive = () => {
         document.getElementById('archive-view').style.display = 'block';
-        const l = document.getElementById('archive-list');
-        const archive = JSON.parse(localStorage.getItem('mf_archive') || "[]");
+        const l = document.getElementById('archive-list'), archive = JSON.parse(localStorage.getItem('mf_archive') || "[]");
         l.innerHTML = archive.length ? '' : '<div style="text-align:center;padding:40px;color:#666">Vacío</div>';
         archive.reverse().forEach((item, idx) => {
             l.innerHTML += `<div class="arch-card"><div class="arch-info"><h3>${item.name}</h3><p>${item.date}</p></div><div class="arch-actions"><button class="icon-btn" style="color:var(--accent)" onclick="loadFromArchive(${item.id})">📥</button><button class="icon-btn" style="color:var(--bad)" onclick="deleteArchive(${idx})">✕</button></div></div>`;
         });
     }
-
-    window.loadFromArchive = (id) => {
-        if(!confirm("¿Cargar plan?")) return;
-        const archive = JSON.parse(localStorage.getItem('mf_archive'));
-        const item = archive.find(x => x.id === id);
-        if(item) { state.plan = item.plan; state.targets = item.targets; renderPlan(); renderGrid(); switchView(); }
-    }
-
-    window.deleteArchive = (idx) => {
-        if(!confirm("¿Borrar?")) return;
-        let archive = JSON.parse(localStorage.getItem('mf_archive'));
-        archive.splice(archive.length - 1 - idx, 1);
-        localStorage.setItem('mf_archive', JSON.stringify(archive));
-        openArchive();
-    }
-
-    window.switchView = (v) => { 
-        document.getElementById('archive-view').style.display='none'; 
-        document.getElementById('lib').style.display='none'; 
-    }
+    window.loadFromArchive = (id) => { if(!confirm("¿Cargar?")) return; const item = JSON.parse(localStorage.getItem('mf_archive')).find(x => x.id === id); if(item) { state.plan = item.plan; state.targets = item.targets; renderPlan(); renderGrid(); switchView(); } }
+    window.deleteArchive = (idx) => { if(!confirm("¿Borrar?")) return; let a = JSON.parse(localStorage.getItem('mf_archive')); a.splice(a.length - 1 - idx, 1); localStorage.setItem('mf_archive', JSON.stringify(a)); openArchive(); }
+    window.switchView = () => { document.getElementById('archive-view').style.display='none'; document.getElementById('lib').style.display='none'; }
 
     window.calcAuto = (silent) => {
-        const w=parseFloat(document.getElementById('w').value)||80, h=parseFloat(document.getElementById('h').value)||180, a=parseFloat(document.getElementById('age').value)||30, s=document.getElementById('sex').value, act=parseFloat(document.getElementById('act').value)||1.55, goal=parseFloat(document.getElementById('goal').value)||0;
-        const targetDay = document.getElementById('target-day').value;
-
+        const w=parseFloat(document.getElementById('w').value)||80, h=parseFloat(document.getElementById('h').value)||180, a=parseFloat(document.getElementById('age').value)||30, s=document.getElementById('sex').value, act=parseFloat(document.getElementById('act').value)||1.55, goal=parseFloat(document.getElementById('goal').value)||0, targetDay=document.getElementById('target-day').value;
         let tmb = (s==='m') ? (10*w)+(6.25*h)-(5*a)+5 : (10*w)+(6.25*h)-(5*a)-161;
-        const kFinal = Math.round(tmb*act*(1+goal));
-        const p=Math.round(w*2), f=Math.round(w*0.9), c=Math.round((kFinal-(p*4)-(f*9))/4);
-        
-        if (targetDay === 'all') DAYS.forEach(d => state.targets[d] = {k: kFinal, p, c, f});
-        else state.targets[targetDay] = {k: kFinal, p, c, f};
-
+        const kFinal = Math.round(tmb*act*(1+goal)), p=Math.round(w*2), f=Math.round(w*0.9), c=Math.round((kFinal-(p*4)-(f*9))/4);
+        if (targetDay === 'all') DAYS.forEach(d => state.targets[d] = {k: kFinal, p, c, f}); else state.targets[targetDay] = {k: kFinal, p, c, f};
         if(!silent) { renderGrid(); alert(`✅ Calculado (${targetDay}): ${kFinal} kcal`); }
     }
 
-    window.setMode = (m) => {
-        state.mode = m;
-        document.getElementById('mode-g').style.background = m==='g'? 'var(--accent)':'transparent';
-        document.getElementById('mode-g').style.color = m==='g'? '#000':'#fff';
-        document.getElementById('mode-p').style.background = m==='p'? 'var(--accent)':'transparent';
-        document.getElementById('mode-p').style.color = m==='p'? '#000':'#fff';
-        renderGrid();
-    }
-
+    window.setMode = (m) => { state.mode = m; renderGrid(); }
     function renderGrid() {
         const g = document.getElementById('grid-wk'); g.innerHTML = '';
         DAYS.forEach(d => {
@@ -438,14 +346,11 @@
             g.innerHTML += `<div class="wk-row"><span style="font-size:10px;font-weight:700;color:#888">${d.substr(0,3)}</span><input id="k_${d}" value="${t.k}" class="mini-inp" onchange="updRow('${d}')"><input id="p_${d}" value="${valP}" class="mini-inp" style="color:var(--bad)" onchange="updRow('${d}')"><input id="c_${d}" value="${valC}" class="mini-inp" style="color:var(--warn)" onchange="updRow('${d}')"><input id="f_${d}" value="${valF}" class="mini-inp" style="color:var(--ok)" onchange="updRow('${d}')"></div>`;
         });
     }
-
     window.updRow = (d) => {
         const k = parseInt(document.getElementById(`k_${d}`).value)||0;
         let p=parseInt(document.getElementById(`p_${d}`).value)||0, c=parseInt(document.getElementById(`c_${d}`).value)||0, f=parseInt(document.getElementById(`f_${d}`).value)||0;
-        if(state.mode==='p') state.targets[d] = { k, p:Math.round((k*p/100)/4), c:Math.round((k*c/100)/4), f:Math.round((k*f/100)/9) };
-        else state.targets[d] = { k, p, c, f };
+        if(state.mode==='p') state.targets[d] = { k, p:Math.round((k*p/100)/4), c:Math.round((k*c/100)/4), f:Math.round((k*f/100)/9) }; else state.targets[d] = { k, p, c, f };
     }
-
     window.saveConfig = () => { DAYS.forEach(d=>updRow(d)); localStorage.setItem('mf_targets_v6', JSON.stringify(state.targets)); document.getElementById('modal').style.display='none'; renderPlan(); }
 
     function renderDays() { document.getElementById('days').innerHTML = DAYS.map(d => `<div class="pill ${state.day===d?'active':''}" onclick="setDay('${d}')">${d}</div>`).join(''); }
@@ -455,34 +360,29 @@
     window.openModal = () => { document.getElementById('modal').style.display='block'; renderGrid(); }
 
     window.renderLib = () => {
-        const l = document.getElementById('lib-list'), s = document.getElementById('search').value.toLowerCase();
-        l.innerHTML='';
+        const l = document.getElementById('lib-list'), s = document.getElementById('search').value.toLowerCase(); l.innerHTML='';
         foodDB.filter(x => {
-            let m = x.type === state.cat;
-            if(state.cat==='Tentempié' && (x.type.includes('Mañana')||x.type.includes('M.MAÑANA'))) m=true;
+            let m = x.type === state.cat; if(state.cat==='Tentempié' && (x.type.includes('Mañana')||x.type.includes('M.MAÑANA'))) m=true;
             return m && (x.name.toLowerCase().includes(s) || x.ings.toLowerCase().includes(s));
         }).forEach(x => {
-            l.innerHTML += `<div class="item" onclick="this.classList.toggle('expanded')"><div class="i-name">${x.name}</div><div class="i-det">🔥${x.kcal} <span style="color:var(--bad)">P${x.p}</span> <span style="color:var(--warn)">C${x.c}</span> <span style="color:var(--ok)">F${x.f}</span></div><div class="i-ing">${x.ings}</div><button class="add-btn" onclick="add(${x.id}, event)">+</button></div>`;
+            l.innerHTML += `<div class="item" onclick="this.classList.toggle('expanded')"><div class="i-name">${x.name}</div><div class="i-det">🔥${x.kcal} <span style="color:var(--bad)">P${x.p}</span> <span style="color:var(--warn)">C${x.c}</span> <span style="color:var(--ok)">F${x.f}</span></div><div class="i-ing">${x.ings}</div><button class="add-btn" onclick="add(${x.id}, event)">+</button><button class="del-lib" onclick="deleteFromCloud(${x.id}, event)">🗑️</button></div>`;
         });
     }
 
     window.renderPlan = () => {
-        const l = document.getElementById('list'); l.innerHTML = '';
-        let t = {k:0,p:0,c:0,f:0};
-        const cp = state.plan[state.day]||[];
-        if(cp.length===0) l.innerHTML = '<div style="text-align:center;padding:50px;color:#333;font-style:italic">Día vacío</div>';
+        const l = document.getElementById('list'); l.innerHTML = ''; let t = {k:0,p:0,c:0,f:0};
+        const cp = state.plan[state.day]||[]; if(cp.length===0) l.innerHTML = '<div style="text-align:center;padding:50px;color:#333;font-style:italic">Día vacío</div>';
         cp.forEach((x,i)=>{
             t.k+=x.kcal; t.p+=x.p; t.c+=x.c; t.f+=x.f;
             l.innerHTML += `<div class="item" onclick="this.classList.toggle('expanded')"><div class="i-cat">${x.type}</div><div class="i-name">${x.name}</div><div class="i-det">🔥${x.kcal} P${x.p} C${x.c} F${x.f}</div><div class="i-ing">${x.ings}</div><button class="del" onclick="del(${i})">✕</button></div>`;
         });
-        const tgt = state.targets[state.day] || {k:2500,p:160,c:300,f:70};
-        upd('k',t.k,tgt.k); upd('p',t.p,tgt.p); upd('c',t.c,tgt.c); upd('f',t.f,tgt.f);
+        const tgt = state.targets[state.day] || {k:2500,p:160,c:300,f:70}; upd('k',t.k,tgt.k); upd('p',t.p,tgt.p); upd('c',t.c,tgt.c); upd('f',t.f,tgt.f);
         localStorage.setItem('mf_plan', JSON.stringify(state.plan));
     }
 
     function upd(k,v,m) { document.getElementById('d'+k).innerText = v + " / " + m; document.getElementById('b'+k).style.width = Math.min((v/m)*100,100)+'%'; }
     window.add = (id, e) => { e.stopPropagation(); const item = foodDB.find(x => x.id === id); state.plan[state.day].push(item); renderPlan(); document.getElementById('lib').style.display='none'; }
-    window.del = i => { if(confirm("¿Borrar?")) { state.plan[state.day].splice(i,1); renderPlan(); } }
+    window.del = i => { if(confirm("¿Quitar del día?")) { state.plan[state.day].splice(i,1); renderPlan(); } }
 
     init();
 </script>
