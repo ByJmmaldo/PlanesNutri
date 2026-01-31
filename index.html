@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>MaldoFit Pro v6.1</title>
+<title>MaldoFit Pro v6.2</title>
 
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
@@ -23,16 +23,13 @@
     h1 { margin:0; font-size:19px; font-weight:800; letter-spacing:-0.5px; background:linear-gradient(90deg,var(--accent),#bc13fe); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
     .icon-btn { background:none; border:none; color:var(--text); cursor:pointer; padding:8px; font-size: 22px; display: flex; align-items: center; justify-content: center; }
     
-    /* EFECTO MAGIA */
     .magic-btn { animation: glow 2s infinite alternate; }
     @keyframes glow { from { text-shadow: 0 0 5px #fff, 0 0 10px var(--accent); } to { text-shadow: 0 0 10px #fff, 0 0 20px var(--accent); } }
 
-    /* TABS */
+    /* TABS & DASHBOARD */
     .tabs { display:flex; overflow-x:auto; gap:8px; padding:15px 20px; scrollbar-width:none; }
     .pill { background: var(--surface); padding: 8px 18px; border-radius: 100px; font-size: 13px; font-weight: 600; color: var(--sub); border: 1px solid transparent; white-space: nowrap; transition: 0.2s; }
     .pill.active { background: var(--text); color: #000; box-shadow: 0 4px 15px rgba(255,255,255,0.15); transform: scale(1.02); }
-    
-    /* DASHBOARD */
     .dash { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; padding:0 20px; margin-bottom:10px; }
     .stat { background:var(--surface); border-radius:var(--radius); padding:12px 5px; text-align:center; position:relative; overflow:hidden; border:1px solid #1a1a1a; }
     .val { display:block; font-weight:700; font-size:12px; margin-bottom:4px; z-index:2; position:relative; }
@@ -48,13 +45,9 @@
     .i-ing { font-size:13px; color:#aaa; margin-top:12px; padding-top:12px; border-top:1px solid #222; line-height:1.5; display:none; }
     .item.expanded .i-ing { display:block; animation:slideDown 0.2s; }
     
-    /* BOTONES LISTA */
+    /* BOTONES */
     .del { position:absolute; top:15px; right:15px; background:transparent; border:none; color:var(--sub); opacity:0.5; width:30px; height:30px; display:flex; align-items:center; justify-content:center; font-size:16px; }
-    
-    /* Botón AÑADIR (Verde) */
     .add-btn { background:var(--ok); color:#000; width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; position:absolute; top:12px; right:12px; font-weight:bold; font-size: 20px; z-index: 5; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
-    
-    /* Botón PAPELERA (Rojo) */
     .del-lib { background: #2a0000; color: #ff4b4b; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; position: absolute; top: 12px; right: 58px; font-size: 16px; border: 1px solid #ff4b4b; cursor: pointer; z-index: 5; }
 
     /* DOCK */
@@ -63,9 +56,11 @@
     .n-item { color:#555; background:none; border:none; transition:0.3s; cursor: pointer; font-size: 24px; display: flex; align-items: center; justify-content: center; padding: 0; }
     .n-item.active { filter: drop-shadow(0 0 5px var(--accent)); transform: scale(1.1); }
 
-    /* MODALS & INPUTS */
-    #modal, #lib, #archive-view, #creator { display:none; position:fixed; inset:0; background:var(--bg); z-index:200; overflow-y:auto; padding-top:calc(env(safe-area-inset-top) + 20px); animation: fadeIn 0.2s; }
+    /* MODALS GENERICOS */
+    #modal, #lib, #archive-view, #creator, #magic-modal { display:none; position:fixed; inset:0; background:var(--bg); z-index:200; overflow-y:auto; padding-top:calc(env(safe-area-inset-top) + 20px); animation: fadeIn 0.2s; }
     .m-box { padding:20px; max-width:500px; margin:0 auto; padding-bottom:80px; }
+    
+    /* INPUTS & FORMS */
     .search-container { position:sticky; top:0; background:var(--bg); z-index:10; padding:20px; border-bottom:1px solid var(--border); display:flex; gap:10px; align-items: center; }
     .search { flex: 1; padding:14px 18px; background:var(--surface); border:1px solid #333; color:#fff; font-size:16px; border-radius:12px; outline:none; }
     .create-btn { background: var(--surface); border: 1px solid #333; color: var(--accent); width: 50px; height: 50px; border-radius: 12px; font-size: 28px; font-weight: 300; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; flex-shrink: 0; }
@@ -77,7 +72,10 @@
     .scan-btn { width:100%; margin-bottom:20px; padding:15px; background:linear-gradient(45deg, #222, #333); border:1px solid #444; border-radius:12px; color:var(--accent); font-weight:bold; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; font-size:14px; }
     #scan-status { font-size:12px; color:var(--accent); text-align:center; margin-bottom:10px; display:none; }
     .arch-card { background:var(--surface); padding:15px; border-radius:12px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; border:1px solid #222; }
-    .arch-info h3 { margin:0; font-size:15px; } .arch-info p { margin:5px 0 0; color:var(--sub); font-size:12px; }
+    
+    /* CHECKBOX MÁGICO */
+    .magic-option { display:flex; align-items:center; justify-content:space-between; background:var(--surface); padding:15px; border-radius:12px; margin-bottom:8px; border:1px solid #333; }
+    .magic-check { width:20px; height:20px; accent-color:var(--accent); }
 
     @keyframes fadeIn { from{opacity:0;transform:scale(0.98)} to{opacity:1;transform:scale(1)} }
     @keyframes slideDown { from{opacity:0;height:0} to{opacity:1;height:auto} }
@@ -90,7 +88,7 @@
     <div class="header">
         <h1>MaldoFit</h1>
         <div style="display:flex; gap:15px;">
-            <button class="icon-btn magic-btn" onclick="autoGeneratePlan()" title="Autocompletar">🪄</button>
+            <button class="icon-btn magic-btn" onclick="openMagic()" title="Generar Plan">🪄</button>
             <button class="icon-btn" onclick="saveToArchive()">💾</button>
             <button class="icon-btn" onclick="openModal()">⚙️</button>
         </div>
@@ -116,6 +114,24 @@
     </div>
     <div class="tabs" id="cats" style="padding:0 20px 10px;"></div>
     <div id="lib-list" class="list" style="padding-top:0"></div>
+</div>
+
+<div id="magic-modal">
+    <div class="m-box">
+        <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
+            <h2 style="color:var(--accent);margin:0;">Generador IA</h2>
+            <button onclick="document.getElementById('magic-modal').style.display='none'" class="icon-btn">✕</button>
+        </div>
+        <p style="color:#888; font-size:13px; margin-bottom:20px;">Elige qué comidas quieres incluir hoy:</p>
+        
+        <label class="magic-option"><span>🍳 Desayuno</span> <input type="checkbox" id="chk-des" checked class="magic-check"></label>
+        <label class="magic-option"><span>🥜 Tentempié (Mañana)</span> <input type="checkbox" id="chk-ten" class="magic-check"></label>
+        <label class="magic-option"><span>🥗 Comida</span> <input type="checkbox" id="chk-com" checked class="magic-check"></label>
+        <label class="magic-option"><span>🍎 Merienda</span> <input type="checkbox" id="chk-mer" class="magic-check"></label>
+        <label class="magic-option"><span>🐟 Cena</span> <input type="checkbox" id="chk-cen" checked class="magic-check"></label>
+
+        <button onclick="runMagic()" style="width:100%; padding:16px; background:var(--accent); color:#000; border:none; border-radius:12px; font-weight:800; margin-top:20px; font-size:16px;">GENERAR PLAN ÓPTIMO 🪄</button>
+    </div>
 </div>
 
 <div id="creator">
@@ -207,35 +223,45 @@
         renderLib();
     }
 
-    // --- GENERADOR AUTOMÁTICO (LA VARITA) ---
-    window.autoGeneratePlan = function() {
+    // --- MAGIA (MONTECARLO SELECTIVO) ---
+    window.openMagic = () => { document.getElementById('magic-modal').style.display='block'; }
+
+    window.runMagic = function() {
         const target = state.targets[state.day];
-        if(!target || target.k < 500) { alert("Configura primero tus objetivos"); return; }
-        
-        if(!confirm(`¿Generar plan automático para el ${state.day}?\nObjetivo: ${target.k} Kcal`)) return;
+        if(!target || target.k < 500) { alert("Configura objetivos primero"); return; }
 
-        const breakfasts = foodDB.filter(x => x.type === "Desayuno");
-        const snacks = foodDB.filter(x => x.type === "Tentempié" || x.type === "Merienda");
-        const meals = foodDB.filter(x => x.type === "Comida" || x.type === "Cena");
+        // Detectar configuración
+        const useDes = document.getElementById('chk-des').checked;
+        const useTen = document.getElementById('chk-ten').checked;
+        const useCom = document.getElementById('chk-com').checked;
+        const useMer = document.getElementById('chk-mer').checked;
+        const useCen = document.getElementById('chk-cen').checked;
 
-        if(breakfasts.length < 1 || meals.length < 2) { alert("Faltan platos en la base de datos para generar magia."); return; }
+        if(!useDes && !useTen && !useCom && !useMer && !useCen) { alert("Selecciona al menos una comida"); return; }
+
+        // Pools de platos
+        const poolDes = foodDB.filter(x => x.type === "Desayuno");
+        const poolSnack = foodDB.filter(x => x.type === "Tentempié" || x.type === "Merienda");
+        const poolMeal = foodDB.filter(x => x.type === "Comida" || x.type === "Cena");
+
+        if(poolDes.length < 1 || poolMeal.length < 2) { alert("Faltan platos en la base de datos"); return; }
 
         let bestPlan = [];
         let bestScore = Infinity;
 
-        // Método Montecarlo (1000 simulaciones)
+        // Simulación
         for(let i=0; i<1000; i++) {
             const plan = [];
-            plan.push(getRandom(breakfasts));
-            plan.push(getRandom(snacks));
-            plan.push(getRandom(meals));
-            plan.push(getRandom(snacks));
-            plan.push(getRandom(meals));
+            if(useDes) plan.push(getRandom(poolDes));
+            if(useTen) plan.push(getRandom(poolSnack));
+            if(useCom) plan.push(getRandom(poolMeal));
+            if(useMer) plan.push(getRandom(poolSnack));
+            if(useCen) plan.push(getRandom(poolMeal));
 
             let k=0, p=0;
             plan.forEach(x => { k+=x.kcal; p+=x.p; });
 
-            // Score: Menor es mejor (diferencia con objetivo)
+            // Score (diferencia kcal)
             const score = Math.abs(target.k - k);
 
             if(score < bestScore) {
@@ -246,77 +272,44 @@
 
         state.plan[state.day] = bestPlan;
         renderPlan();
-        alert(`✨ Plan Generado: ${bestPlan.reduce((a,b)=>a+b.kcal,0)} Kcal`);
+        document.getElementById('magic-modal').style.display='none';
+        
+        let totalK = bestPlan.reduce((a,b)=>a+b.kcal,0);
+        alert(`✨ Plan Generado: ${totalK} Kcal\n(Objetivo: ${target.k})`);
     }
 
     function getRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
     // --- BORRADO NUBE ---
     window.deleteFromCloud = async (id, e) => {
-        e.stopPropagation();
-        if(!confirm("⚠️ ¿Borrar de BD? (Irreversible)")) return;
+        e.stopPropagation(); if(!confirm("⚠️ ¿Borrar de BD?")) return;
         let docId = (id > 1000000000) ? "c_" + id : "p" + id;
-        try {
-            await db.collection("comidas").doc(docId).delete();
-            foodDB = foodDB.filter(x => x.id !== id);
-            renderLib();
-            alert("🗑️ Eliminado");
-        } catch(e) { alert("Error: " + e.message); }
+        try { await db.collection("comidas").doc(docId).delete(); foodDB = foodDB.filter(x => x.id !== id); renderLib(); alert("🗑️ Eliminado"); } catch(e) { alert("Error: " + e.message); }
     }
 
-    // --- IA & CREACIÓN (FIXED KJ) ---
+    // --- IA & CREACIÓN ---
     window.openCreator = () => { document.getElementById('creator').style.display='block'; }
     window.autoCalcKcal = () => {
         const p = parseFloat(document.getElementById('new-p').value)||0, c = parseFloat(document.getElementById('new-c').value)||0, f = parseFloat(document.getElementById('new-f').value)||0;
         document.getElementById('new-k').value = Math.round((p*4) + (c*4) + (f*9));
     }
-
     window.processImage = async (input) => {
         const file = input.files[0]; if(!file) return;
-        const status = document.getElementById('scan-status');
-        status.style.display = "block"; status.style.animation = "pulse 1s infinite";
-        
+        const status = document.getElementById('scan-status'); status.style.display = "block"; status.style.animation = "pulse 1s infinite";
         try {
-            const worker = await Tesseract.createWorker('eng');
-            const ret = await worker.recognize(file);
-            const text = ret.data.text.toLowerCase();
-            
-            const find = (keys) => {
-                const regex = new RegExp(`(${keys.join('|')})[^0-9]*([0-9]+[.,]?[0-9]*)`, 'i');
-                const match = text.match(regex);
-                return match ? parseFloat(match[2].replace(',','.')) : 0;
-            };
-
+            const worker = await Tesseract.createWorker('eng'); const ret = await worker.recognize(file); const text = ret.data.text.toLowerCase();
+            const find = (keys) => { const regex = new RegExp(`(${keys.join('|')})[^0-9]*([0-9]+[.,]?[0-9]*)`, 'i'); const match = text.match(regex); return match ? parseFloat(match[2].replace(',','.')) : 0; };
             const p = find(['protein','proteina']), c = find(['carb','hidratos']), f = find(['fat','grasa']), k = find(['kcal','energy','valor']);
-
-            if(p) document.getElementById('new-p').value = p;
-            if(c) document.getElementById('new-c').value = c;
-            if(f) document.getElementById('new-f').value = f;
-            
-            const mathKcal = Math.round((p*4) + (c*4) + (f*9));
-            if (k > 0) {
-                if (mathKcal > 0 && k > (mathKcal * 2)) document.getElementById('new-k').value = Math.round(k / 4.184); // Convert kJ
-                else document.getElementById('new-k').value = k;
-            } else {
-                autoCalcKcal();
-            }
-
-            status.innerHTML = "✅ ¡Leído!"; status.style.animation = "none";
-            await worker.terminate();
+            if(p) document.getElementById('new-p').value = p; if(c) document.getElementById('new-c').value = c; if(f) document.getElementById('new-f').value = f;
+            setTimeout(() => { if(k > 0 && k < (p*4+c*4+f*9)*2) document.getElementById('new-k').value = k; else autoCalcKcal(); }, 100);
+            status.innerHTML = "✅ ¡Leído!"; status.style.animation = "none"; await worker.terminate();
         } catch (e) { status.innerHTML = "❌ Error lectura."; }
     }
-
     window.saveCustomFood = async () => {
-        const name = document.getElementById('new-name').value;
-        const p = parseFloat(document.getElementById('new-p').value)||0, c = parseFloat(document.getElementById('new-c').value)||0, f = parseFloat(document.getElementById('new-f').value)||0, k = parseInt(document.getElementById('new-k').value)||0;
-        const ing = document.getElementById('new-ing').value || "Personalizado";
+        const name = document.getElementById('new-name').value, p = parseFloat(document.getElementById('new-p').value)||0, c = parseFloat(document.getElementById('new-c').value)||0, f = parseFloat(document.getElementById('new-f').value)||0, k = parseInt(document.getElementById('new-k').value)||0, ing = document.getElementById('new-ing').value || "Personalizado";
         if(!name) { alert("Pon un nombre"); return; }
         const newItem = { id: Date.now(), name: name, type: state.cat, p: p, c: c, f: f, kcal: k, ings: ing };
-        try {
-            await db.collection("comidas").doc("c_" + newItem.id).set(newItem);
-            foodDB.push(newItem); renderLib(); document.getElementById('creator').style.display='none';
-            document.getElementById('new-name').value = ""; alert("✅ Guardado");
-        } catch(e) { alert("Error: " + e.message); }
+        try { await db.collection("comidas").doc("c_" + newItem.id).set(newItem); foodDB.push(newItem); renderLib(); document.getElementById('creator').style.display='none'; document.getElementById('new-name').value = ""; alert("✅ Guardado"); } catch(e) { alert("Error: " + e.message); }
     }
 
     // --- CORE ---
@@ -324,9 +317,7 @@
         const name = prompt("Nombre:"); if(!name) return;
         const item = { id: Date.now(), name: name, date: new Date().toLocaleDateString(), plan: state.plan, targets: state.targets };
         let archive = JSON.parse(localStorage.getItem('mf_archive') || "[]");
-        archive.push(item);
-        localStorage.setItem('mf_archive', JSON.stringify(archive));
-        alert("Guardado");
+        archive.push(item); localStorage.setItem('mf_archive', JSON.stringify(archive)); alert("Guardado");
     }
     window.openArchive = () => {
         document.getElementById('archive-view').style.display = 'block';
