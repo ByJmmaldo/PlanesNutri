@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>MaldoFit Pro v6.0</title>
+<title>MaldoFit Pro v6.1</title>
 
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
@@ -50,7 +50,11 @@
     
     /* BOTONES LISTA */
     .del { position:absolute; top:15px; right:15px; background:transparent; border:none; color:var(--sub); opacity:0.5; width:30px; height:30px; display:flex; align-items:center; justify-content:center; font-size:16px; }
+    
+    /* Botón AÑADIR (Verde) */
     .add-btn { background:var(--ok); color:#000; width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; position:absolute; top:12px; right:12px; font-weight:bold; font-size: 20px; z-index: 5; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
+    
+    /* Botón PAPELERA (Rojo) */
     .del-lib { background: #2a0000; color: #ff4b4b; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; position: absolute; top: 12px; right: 58px; font-size: 16px; border: 1px solid #ff4b4b; cursor: pointer; z-index: 5; }
 
     /* DOCK */
@@ -86,7 +90,7 @@
     <div class="header">
         <h1>MaldoFit</h1>
         <div style="display:flex; gap:15px;">
-            <button class="icon-btn magic-btn" onclick="autoGeneratePlan()" title="Autocompletar Día">🪄</button>
+            <button class="icon-btn magic-btn" onclick="autoGeneratePlan()" title="Autocompletar">🪄</button>
             <button class="icon-btn" onclick="saveToArchive()">💾</button>
             <button class="icon-btn" onclick="openModal()">⚙️</button>
         </div>
@@ -203,40 +207,36 @@
         renderLib();
     }
 
-    // --- AUTO GENERADOR (MÉTODO MONTECARLO) ---
+    // --- GENERADOR AUTOMÁTICO (LA VARITA) ---
     window.autoGeneratePlan = function() {
         const target = state.targets[state.day];
         if(!target || target.k < 500) { alert("Configura primero tus objetivos"); return; }
         
-        if(!confirm(`¿Generar plan automático para el ${state.day}?\nObjetivo: ${target.k} Kcal (Prioridad Proteínas)`)) return;
+        if(!confirm(`¿Generar plan automático para el ${state.day}?\nObjetivo: ${target.k} Kcal`)) return;
 
-        // 1. Clasificar platos
         const breakfasts = foodDB.filter(x => x.type === "Desayuno");
         const snacks = foodDB.filter(x => x.type === "Tentempié" || x.type === "Merienda");
         const meals = foodDB.filter(x => x.type === "Comida" || x.type === "Cena");
 
-        if(breakfasts.length < 1 || meals.length < 2) { alert("Faltan platos en la base de datos"); return; }
+        if(breakfasts.length < 1 || meals.length < 2) { alert("Faltan platos en la base de datos para generar magia."); return; }
 
         let bestPlan = [];
         let bestScore = Infinity;
 
-        // 2. Simulación Montecarlo (1000 intentos)
+        // Método Montecarlo (1000 simulaciones)
         for(let i=0; i<1000; i++) {
             const plan = [];
-            // Estructura: Desayuno, Tentempié, Comida, Merienda, Cena
             plan.push(getRandom(breakfasts));
             plan.push(getRandom(snacks));
             plan.push(getRandom(meals));
             plan.push(getRandom(snacks));
             plan.push(getRandom(meals));
 
-            // Calcular Sumas
-            let k=0, p=0, c=0, f=0;
-            plan.forEach(x => { k+=x.kcal; p+=x.p; c+=x.c; f+=x.f; });
+            let k=0, p=0;
+            plan.forEach(x => { k+=x.kcal; p+=x.p; });
 
-            // Calcular Error (Puntaje)
-            // Priorizamos Proteína (x3) y Calorías (x1)
-            const score = (Math.abs(target.k - k)) + (Math.abs(target.p - p) * 3);
+            // Score: Menor es mejor (diferencia con objetivo)
+            const score = Math.abs(target.k - k);
 
             if(score < bestScore) {
                 bestScore = score;
@@ -244,46 +244,79 @@
             }
         }
 
-        // 3. Aplicar Ganador
         state.plan[state.day] = bestPlan;
         renderPlan();
-        
-        let totalK = bestPlan.reduce((a,b)=>a+b.kcal,0);
-        alert(`✨ ¡Magia realizada!\nPlan generado: ${totalK} Kcal\n(Diferencia: ${totalK - target.k} kcal)`);
+        alert(`✨ Plan Generado: ${bestPlan.reduce((a,b)=>a+b.kcal,0)} Kcal`);
     }
 
     function getRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
     // --- BORRADO NUBE ---
     window.deleteFromCloud = async (id, e) => {
-        e.stopPropagation(); if(!confirm("⚠️ ¿Borrar de BD?")) return;
+        e.stopPropagation();
+        if(!confirm("⚠️ ¿Borrar de BD? (Irreversible)")) return;
         let docId = (id > 1000000000) ? "c_" + id : "p" + id;
-        try { await db.collection("comidas").doc(docId).delete(); foodDB = foodDB.filter(x => x.id !== id); renderLib(); alert("🗑️ Eliminado"); } catch(e) { alert("Error: " + e.message); }
+        try {
+            await db.collection("comidas").doc(docId).delete();
+            foodDB = foodDB.filter(x => x.id !== id);
+            renderLib();
+            alert("🗑️ Eliminado");
+        } catch(e) { alert("Error: " + e.message); }
     }
 
-    // --- IA & CREACIÓN ---
+    // --- IA & CREACIÓN (FIXED KJ) ---
     window.openCreator = () => { document.getElementById('creator').style.display='block'; }
     window.autoCalcKcal = () => {
         const p = parseFloat(document.getElementById('new-p').value)||0, c = parseFloat(document.getElementById('new-c').value)||0, f = parseFloat(document.getElementById('new-f').value)||0;
         document.getElementById('new-k').value = Math.round((p*4) + (c*4) + (f*9));
     }
+
     window.processImage = async (input) => {
         const file = input.files[0]; if(!file) return;
-        const status = document.getElementById('scan-status'); status.style.display = "block"; status.style.animation = "pulse 1s infinite";
+        const status = document.getElementById('scan-status');
+        status.style.display = "block"; status.style.animation = "pulse 1s infinite";
+        
         try {
-            const worker = await Tesseract.createWorker('eng'); const ret = await worker.recognize(file); const text = ret.data.text.toLowerCase();
-            const find = (keys) => { const regex = new RegExp(`(${keys.join('|')})[^0-9]*([0-9]+[.,]?[0-9]*)`, 'i'); const match = text.match(regex); return match ? parseFloat(match[2].replace(',','.')) : 0; };
+            const worker = await Tesseract.createWorker('eng');
+            const ret = await worker.recognize(file);
+            const text = ret.data.text.toLowerCase();
+            
+            const find = (keys) => {
+                const regex = new RegExp(`(${keys.join('|')})[^0-9]*([0-9]+[.,]?[0-9]*)`, 'i');
+                const match = text.match(regex);
+                return match ? parseFloat(match[2].replace(',','.')) : 0;
+            };
+
             const p = find(['protein','proteina']), c = find(['carb','hidratos']), f = find(['fat','grasa']), k = find(['kcal','energy','valor']);
-            if(p) document.getElementById('new-p').value = p; if(c) document.getElementById('new-c').value = c; if(f) document.getElementById('new-f').value = f;
-            setTimeout(() => { if(k > 0 && k < (p*4+c*4+f*9)*2) document.getElementById('new-k').value = k; else autoCalcKcal(); }, 100);
-            status.innerHTML = "✅ ¡Leído!"; status.style.animation = "none"; await worker.terminate();
+
+            if(p) document.getElementById('new-p').value = p;
+            if(c) document.getElementById('new-c').value = c;
+            if(f) document.getElementById('new-f').value = f;
+            
+            const mathKcal = Math.round((p*4) + (c*4) + (f*9));
+            if (k > 0) {
+                if (mathKcal > 0 && k > (mathKcal * 2)) document.getElementById('new-k').value = Math.round(k / 4.184); // Convert kJ
+                else document.getElementById('new-k').value = k;
+            } else {
+                autoCalcKcal();
+            }
+
+            status.innerHTML = "✅ ¡Leído!"; status.style.animation = "none";
+            await worker.terminate();
         } catch (e) { status.innerHTML = "❌ Error lectura."; }
     }
+
     window.saveCustomFood = async () => {
-        const name = document.getElementById('new-name').value, p = parseFloat(document.getElementById('new-p').value)||0, c = parseFloat(document.getElementById('new-c').value)||0, f = parseFloat(document.getElementById('new-f').value)||0, k = parseInt(document.getElementById('new-k').value)||0, ing = document.getElementById('new-ing').value || "Personalizado";
+        const name = document.getElementById('new-name').value;
+        const p = parseFloat(document.getElementById('new-p').value)||0, c = parseFloat(document.getElementById('new-c').value)||0, f = parseFloat(document.getElementById('new-f').value)||0, k = parseInt(document.getElementById('new-k').value)||0;
+        const ing = document.getElementById('new-ing').value || "Personalizado";
         if(!name) { alert("Pon un nombre"); return; }
         const newItem = { id: Date.now(), name: name, type: state.cat, p: p, c: c, f: f, kcal: k, ings: ing };
-        try { await db.collection("comidas").doc("c_" + newItem.id).set(newItem); foodDB.push(newItem); renderLib(); document.getElementById('creator').style.display='none'; document.getElementById('new-name').value = ""; alert("✅ Guardado"); } catch(e) { alert("Error: " + e.message); }
+        try {
+            await db.collection("comidas").doc("c_" + newItem.id).set(newItem);
+            foodDB.push(newItem); renderLib(); document.getElementById('creator').style.display='none';
+            document.getElementById('new-name').value = ""; alert("✅ Guardado");
+        } catch(e) { alert("Error: " + e.message); }
     }
 
     // --- CORE ---
@@ -291,7 +324,9 @@
         const name = prompt("Nombre:"); if(!name) return;
         const item = { id: Date.now(), name: name, date: new Date().toLocaleDateString(), plan: state.plan, targets: state.targets };
         let archive = JSON.parse(localStorage.getItem('mf_archive') || "[]");
-        archive.push(item); localStorage.setItem('mf_archive', JSON.stringify(archive)); alert("Guardado");
+        archive.push(item);
+        localStorage.setItem('mf_archive', JSON.stringify(archive));
+        alert("Guardado");
     }
     window.openArchive = () => {
         document.getElementById('archive-view').style.display = 'block';
